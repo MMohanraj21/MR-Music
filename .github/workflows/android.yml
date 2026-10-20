@@ -10,6 +10,9 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build APK
@@ -31,9 +34,40 @@ jobs:
       - name: Build APK with Gradle
         run: ./gradlew assembleGithubDebug --stacktrace
 
-      - name: Upload MR Music APK
+      - name: Rename APK
+        run: |
+          cd app/build/outputs/apk/github/debug
+          cp *.apk MR-Music-v1.0.0.apk
+          ls -la
+
+      - name: Upload MR Music APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MR-Music-Debug-APK
-          path: app/build/outputs/apk/github/debug/*.apk
+          path: app/build/outputs/apk/github/debug/MR-Music-v1.0.0.apk
           retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: "MR Music v1.0.0"
+          draft: false
+          prerelease: false
+          body: |
+            ## 🎵 MR Music v1.0.0
+            
+            Developed exclusively by **MR** (**MR Music Studio**).
+            
+            ### ✨ Highlights
+            - **Application ID:** `com.apple.android.music`
+            - **Developer:** MR (MR Music Studio)
+            - **Custom Logo:** Neon gradient monogram & audio spectrum
+            - **Engine:** High-Fidelity Lossless Audio Engine
+            
+            ### 📥 Download
+            Download **`MR-Music-v1.0.0.apk`** below to install directly on your Android device!
+          files: app/build/outputs/apk/github/debug/MR-Music-v1.0.0.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
