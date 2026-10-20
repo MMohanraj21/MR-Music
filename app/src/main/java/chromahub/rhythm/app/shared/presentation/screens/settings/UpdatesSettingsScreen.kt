@@ -221,8 +221,8 @@ fun UpdatesSettingsScreen(onBackClick: () -> Unit) {
             knownIssues = listOf(
                 "Simulated sandbox mode overrides actual remote check updates."
             ),
-            downloadUrl = "https://github.com/cromaguy/Rhythm/releases",
-            apkAssetName = "rhythm-v3.2.0-beta.apk",
+            downloadUrl = "https://github.com/MMohanraj21/MR-Music/releases",
+            apkAssetName = "MR-Music-v1.0.13-release.apk",
             apkSize = 18454937, // ~17.6 MB
             releaseNotes = "Simulated update notes",
             isPreRelease = true,
@@ -332,7 +332,7 @@ fun UpdatesSettingsScreen(onBackClick: () -> Unit) {
         activeDownloadedFile != null -> "Version ${activeLatestVersion?.versionName ?: "?"} is ready to install"
         activeUpdateAvailable -> "Version ${activeLatestVersion?.versionName ?: "?"} • ${activeLatestVersion?.let { updaterViewModel.getReadableFileSize(it.apkSize) } ?: ""}"
         !autoCheckForUpdates -> context.getString(R.string.updates_auto_disabled)
-        else -> "Rhythm is up to date with the latest features and security updates"
+        else -> "MR Music is up to date with the latest features and security updates"
     }
 
     val headerBlendHeight = 24.dp
@@ -894,9 +894,9 @@ fun UpdatesSettingsScreen(onBackClick: () -> Unit) {
                             HapticUtils.performHapticFeedback(context, haptics, HapticType.HEAVY)
                             val tag = currentVersion.versionName
                             val releaseUrl = if (tag.startsWith("v", ignoreCase = true)) {
-                                "https://github.com/cromaguy/Rhythm/releases/tag/$displayVersionName"
+                                "https://github.com/MMohanraj21/MR-Music/releases/tag/$displayVersionName"
                             } else {
-                                "https://github.com/cromaguy/Rhythm/releases/tag/v$displayVersionName"
+                                "https://github.com/MMohanraj21/MR-Music/releases/tag/v$displayVersionName"
                             }
                             try {
                                 val intent = Intent(Intent.ACTION_VIEW, (releaseUrl).toUri())
