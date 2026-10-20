@@ -349,8 +349,9 @@ fun AboutScreen(
                         shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 20.dp, bottomEnd = 20.dp),
                         onClick = {
                             val allInfo = buildString {
-                                appendLine("=== Rhythm System Information ===")
-                                appendLine("App: Rhythm")
+                                appendLine("=== MR Music System Information ===")
+                                appendLine("App: MR Music")
+                                appendLine("Developer: Mohanraj.MS")
                                 appendLine("Version: ${BuildConfig.VERSION_NAME}")
                                 appendLine("Build: ${BuildConfig.VERSION_CODE} ($buildVariant)")
                                 appendLine("Target SDK: ${appInfo.targetSdkVersion}")
@@ -378,8 +379,8 @@ fun AboutScreen(
                 )
 
                 DeveloperCard(
-                    name = "MR",
-                    githubUsername = "MR",
+                    name = "Mohanraj.MS",
+                    githubUsername = "MMohanraj21",
                     avatarUrl = "",
                     supportUrl = "",
                     teamTitle = "MR Music Studio",
@@ -387,8 +388,6 @@ fun AboutScreen(
                     openUrl = openUrl
                 )
             }
-
-
 
             item {
                 val actionItems = listOf(
@@ -411,8 +410,8 @@ fun AboutScreen(
                         item = SettingItem(
                             icon = RhythmIcons.BugReport,
                             title = context.getString(R.string.settings_about_report_bug),
-                            description = "github.com/cromaguy/Rhythm/issues",
-                            onClick = { openUrl("https://github.com/cromaguy/Rhythm/issues") }
+                            description = "github.com/MMohanraj21/MR-Music/issues",
+                            onClick = { openUrl("https://github.com/MMohanraj21/MR-Music/issues") }
                         )
                     ),
                     toMaterial3SettingsItem(
@@ -423,26 +422,6 @@ fun AboutScreen(
                             title = context.getString(R.string.settings_about_open_source_libs),
                             description = context.getString(R.string.settings_about_view_dependencies),
                             onClick = { showLicensesSheet = true }
-                        )
-                    ),
-                    toMaterial3SettingsItem(
-                        context = context,
-                        hapticFeedback = haptics,
-                        item = SettingItem(
-                            icon = MaterialSymbolIcon("chat", filled = true),
-                            title = stringResource(R.string.aboutscreen_discord_community),
-                            description = "discord.gg/XjPyUYPQYc",
-                            onClick = { openUrl("https://discord.gg/XjPyUYPQYc") }
-                        )
-                    ),
-                    toMaterial3SettingsItem(
-                        context = context,
-                        hapticFeedback = haptics,
-                        item = SettingItem(
-                            icon = MaterialSymbolIcon("send", filled = true),
-                            title = stringResource(R.string.cd_telegram_support),
-                            description = "t.me/RhythmSupport",
-                            onClick = { openUrl("https://t.me/RhythmSupport") }
                         )
                     ),
                     toMaterial3SettingsItem(
@@ -540,7 +519,7 @@ fun DeveloperCard(
                     ExpressiveGroupButton(
                         onClick = {
                             HapticUtils.performHapticFeedback(context, haptics, HapticType.LIGHT)
-                            openUrl("https://rhythmweb.vercel.app/")
+                            openUrl("https://github.com/MMohanraj21/MR-Music")
                         },
                         isStart = true,
                         modifier = Modifier.weight(1f)
@@ -581,34 +560,6 @@ fun DeveloperCard(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Button(
-                    onClick = {
-                        HapticUtils.performHapticFeedback(context, haptics, HapticType.HEAVY)
-                        openUrl(supportUrl)
-                    },
-                    shape = ExpressiveShapes.Full,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 12.dp)
-                ) {
-                    Icon(
-                        imageVector = MaterialSymbolIcon("local_cafe", filled = true),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.aboutscreen_support_development),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
                 }
             }
         }

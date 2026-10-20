@@ -36,9 +36,10 @@ jobs:
 
       - name: Rename APK
         run: |
-          cd app/build/outputs/apk/github/debug
-          cp *.apk MR-Music-v1.0.0.apk
-          ls -la
+          APK_FILE=$(find app/build/outputs/apk/github/debug/ -type f -name "*.apk" | head -n 1)
+          echo "Found APK: $APK_FILE"
+          cp "$APK_FILE" app/build/outputs/apk/github/debug/MR-Music-v1.0.0.apk
+          ls -lh app/build/outputs/apk/github/debug/
 
       - name: Upload MR Music APK Artifact
         uses: actions/upload-artifact@v4
@@ -58,15 +59,15 @@ jobs:
           body: |
             ## 🎵 MR Music v1.0.0
             
-            Developed exclusively by **MR** (**MR Music Studio**).
+            Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
             
             ### ✨ Highlights
             - **Application ID:** `com.apple.android.music`
-            - **Developer:** MR (MR Music Studio)
+            - **Developer:** Mohanraj.MS (MR Music Studio)
             - **Custom Logo:** Neon gradient monogram & audio spectrum
             - **Engine:** High-Fidelity Lossless Audio Engine
             
-            ### 📥 Download
+            ### 📥 Direct APK Download
             Download **`MR-Music-v1.0.0.apk`** below to install directly on your Android device!
           files: app/build/outputs/apk/github/debug/MR-Music-v1.0.0.apk
         env:
