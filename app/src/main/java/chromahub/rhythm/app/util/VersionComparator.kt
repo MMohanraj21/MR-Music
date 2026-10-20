@@ -90,6 +90,7 @@ object VersionComparator {
 
     private val BUILD_REGEX = Regex("(?:b|build|r)-?(\\d+)", RegexOption.IGNORE_CASE)
     private val NIGHTLY_RUN_REGEX = Regex("nightly-r(\\d+)", RegexOption.IGNORE_CASE)
+    private val VERSION_REGEX = Regex("(?:v|V)?(\\d+(?:\\.\\d+)+)")
 
     /**
      * Parse a version string into a [SemanticVersion].
@@ -121,8 +122,9 @@ object VersionComparator {
             // Extract explicit build number (e.g. b-1200)
             val explicitBuildNumber = BUILD_REGEX.find(cleaned)?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
-            // Extract numeric base: split by space, hyphen, underscore
-            val baseWithoutSuffix = cleaned
+            // Extract numeric base: try matching digits pattern first, then fallback to split
+            val versionMatch = VERSION_REGEX.find(cleaned)?.groupValues?.get(1)
+            val baseWithoutSuffix = versionMatch ?: cleaned
                 .split(" ")[0]
                 .split("-")[0]
                 .split("_")[0]

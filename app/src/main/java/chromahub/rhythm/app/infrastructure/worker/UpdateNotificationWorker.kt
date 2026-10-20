@@ -222,12 +222,12 @@ class UpdateNotificationWorker(
                 if (releasesResponse.isSuccessful && releasesResponse.body() != null) {
                     val allReleases = releasesResponse.body()
                     val bestRelease = allReleases?.filter { !it.draft }?.maxWithOrNull { r1, r2 ->
-                        val v1 = r1.name.ifEmpty { r1.tag_name }
-                        val v2 = r2.name.ifEmpty { r2.tag_name }
+                        val v1 = r1.tag_name.ifEmpty { r1.name }
+                        val v2 = r2.tag_name.ifEmpty { r2.name }
                         VersionComparator.compare(v1, v2, isPreRelease1 = r1.prerelease, isPreRelease2 = r2.prerelease)
                     }
                     if (bestRelease != null) {
-                        releaseVersionTag = bestRelease.name.ifEmpty { bestRelease.tag_name }
+                        releaseVersionTag = bestRelease.tag_name.ifEmpty { bestRelease.name }
                     }
                 }
 
@@ -308,8 +308,8 @@ class UpdateNotificationWorker(
                             @Suppress("UNCHECKED_CAST")
                             val releaseList = (response.body() as? List<chromahub.rhythm.app.network.GitHubRelease>)
                             releaseList?.filter { !it.draft }?.maxWithOrNull { r1, r2 ->
-                                val v1 = r1.name.ifEmpty { r1.tag_name }
-                                val v2 = r2.name.ifEmpty { r2.tag_name }
+                                val v1 = r1.tag_name.ifEmpty { r1.name }
+                                val v2 = r2.tag_name.ifEmpty { r2.name }
                                 VersionComparator.compare(v1, v2, isPreRelease1 = r1.prerelease, isPreRelease2 = r2.prerelease)
                             }
                         } else {
@@ -317,7 +317,7 @@ class UpdateNotificationWorker(
                         }
                         
                         if (bestRelease != null) {
-                            val newVersionTag = bestRelease.name.ifEmpty { bestRelease.tag_name }
+                            val newVersionTag = bestRelease.tag_name.ifEmpty { bestRelease.name }
                             val isNewer = VersionComparator.isNewer(
                                 candidate = newVersionTag,
                                 current = BuildConfig.VERSION_NAME,

@@ -53,7 +53,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.14
-          name: "MR Music v1.0.14"
+          name: "v1.0.14"
           draft: false
           prerelease: false
           body: |
