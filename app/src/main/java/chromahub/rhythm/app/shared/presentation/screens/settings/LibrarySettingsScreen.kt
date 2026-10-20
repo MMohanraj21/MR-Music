@@ -164,7 +164,10 @@ import chromahub.rhythm.app.shared.presentation.screens.settings.SettingGroup
 
 
 @Composable
-fun LibrarySettingsScreen(onBackClick: () -> Unit) {
+fun LibrarySettingsScreen(
+    onBackClick: () -> Unit,
+    onNavigateTo: ((String) -> Unit)? = null
+) {
     val context = LocalContext.current
     val appSettings = AppSettings.getInstance(context)
     val haptics = LocalHapticFeedback.current
@@ -196,6 +199,19 @@ fun LibrarySettingsScreen(onBackClick: () -> Unit) {
         onBackClick = onBackClick
     ) { modifier ->
         val settingGroups = listOf(
+            SettingGroup(
+                title = "Library Tools & Maintenance",
+                items = listOf(
+                    SettingItem(
+                        icon = MaterialSymbolIcon("content_copy"),
+                        title = "Duplicate Cleaner",
+                        description = "Find and remove duplicate songs to free up storage",
+                        onClick = {
+                            onNavigateTo?.invoke(SettingsRoutes.DUPLICATE_CLEANER)
+                        }
+                    )
+                )
+            ),
             SettingGroup(
                 title = context.getString(R.string.settings_library_group_organization),
                 items = listOf(

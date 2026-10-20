@@ -187,6 +187,7 @@ object SettingsRoutes {
     const val RHYTHM_STATS = "rhythm_stats"
     const val EXPRESSIVE_SHAPES = "expressive_shapes_settings"
     const val LIBRARY_SETTINGS = "library_settings"
+    const val DUPLICATE_CLEANER = "duplicate_cleaner_settings"
     const val RHYTHM_GUARD = "rhythm_guard_settings"
     @Deprecated("Use RHYTHM_GUARD")
     const val RHYTHM_AURA = RHYTHM_GUARD
@@ -1201,7 +1202,14 @@ fun SettingsScreenWrapper(
                         SettingsRoutes.HOME_SCREEN -> HomeScreenCustomizationSettingsScreen(onBackClick = handleBack)
                         SettingsRoutes.GESTURES -> GesturesSettingsScreen(onBackClick = handleBack)
                         SettingsRoutes.EXPRESSIVE_SHAPES -> ExpressiveShapesSettingsScreen(onBackClick = handleBack)
-                        SettingsRoutes.LIBRARY_SETTINGS -> LibrarySettingsScreen(onBackClick = handleBack)
+                        SettingsRoutes.LIBRARY_SETTINGS -> LibrarySettingsScreen(
+                            onBackClick = handleBack,
+                            onNavigateTo = onNavigateToSubsetting
+                        )
+                        SettingsRoutes.DUPLICATE_CLEANER -> DuplicateCleanerScreen(
+                            onBackClick = handleBack,
+                            musicViewModel = musicViewModel
+                        )
                         SettingsRoutes.RHYTHM_GUARD -> RhythmGuardSettingsScreen(onBackClick = handleBack)
                         SettingsRoutes.BATTERY_SAVER -> PerformanceSettingsScreen(onBackClick = handleBack)
                         else -> PlaceholderSettingsScreen()
@@ -1356,7 +1364,14 @@ fun SettingsScreenWrapper(
                 SettingsRoutes.HOME_SCREEN -> HomeScreenCustomizationSettingsScreen(onBackClick = handleBack)
                 SettingsRoutes.GESTURES -> GesturesSettingsScreen(onBackClick = handleBack)
                 SettingsRoutes.EXPRESSIVE_SHAPES -> ExpressiveShapesSettingsScreen(onBackClick = handleBack)
-                SettingsRoutes.LIBRARY_SETTINGS -> LibrarySettingsScreen(onBackClick = handleBack)
+                SettingsRoutes.LIBRARY_SETTINGS -> LibrarySettingsScreen(
+                    onBackClick = handleBack,
+                    onNavigateTo = onNavigateToSubsetting
+                )
+                SettingsRoutes.DUPLICATE_CLEANER -> DuplicateCleanerScreen(
+                    onBackClick = handleBack,
+                    musicViewModel = musicViewModel
+                )
                 SettingsRoutes.RHYTHM_GUARD -> RhythmGuardSettingsScreen(onBackClick = handleBack)
                 SettingsRoutes.BATTERY_SAVER -> PerformanceSettingsScreen(onBackClick = handleBack)
                 else -> SettingsScreen(

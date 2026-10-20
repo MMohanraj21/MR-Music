@@ -272,6 +272,7 @@ sealed class Screen(val route: String) {
     object TunerMiniPlayerCustomization : Screen("tuner_miniplayer_customization_settings")
     object TunerBatterySaver : Screen("tuner_battery_saver_settings")
     object TunerLibrarySettings : Screen("tuner_library_settings")
+    object TunerDuplicateCleaner : Screen("tuner_duplicate_cleaner_settings")
     object TunerRhythmGuard : Screen("tuner_rhythm_guard_settings")
     object TunerLyrics : Screen("tuner_lyrics_settings")
     object TunerGestures : Screen("tuner_gestures_settings")
@@ -2366,7 +2367,21 @@ private fun LocalNavigationContent(
                 }
 
                 composable(Screen.TunerLibrarySettings.route) {
-                    LibrarySettingsScreen(onBackClick = navigateBackOrToSettings)
+                    LibrarySettingsScreen(
+                        onBackClick = navigateBackOrToSettings,
+                        onNavigateTo = { route ->
+                            if (route == SettingsRoutes.DUPLICATE_CLEANER) {
+                                navController.navigate(Screen.TunerDuplicateCleaner.route)
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.TunerDuplicateCleaner.route) {
+                    DuplicateCleanerScreen(
+                        onBackClick = navigateBackOrToSettings,
+                        musicViewModel = musicViewModel
+                    )
                 }
 
                 composable(Screen.TunerRhythmGuard.route) {
