@@ -23,12 +23,12 @@ plugins {
 
 android {
     namespace = "chromahub.rhythm.app"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.apple.android.music"
+        applicationId = "com.luna.music"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         
         val overrideVersionCode = project.findProperty("versionCodeOverride")?.toString()?.toIntOrNull()
         val overrideVersionName = project.findProperty("versionNameOverride")?.toString()
@@ -60,7 +60,7 @@ android {
     productFlavors {
         create("fdroid") {
             dimension = "distribution"
-            applicationId = "com.apple.android.music"
+            applicationId = "com.luna.music"
             
             // F-Droid build: Enable all features (FOSS ethos)
             buildConfigField("boolean", "ENABLE_YOUTUBE_MUSIC", "true")
@@ -77,7 +77,7 @@ android {
         
         create("github") {
             dimension = "distribution"
-            applicationId = "com.apple.android.music"
+            applicationId = "com.luna.music"
             
             // GitHub releases: Enable all features (same as F-Droid)
             buildConfigField("boolean", "ENABLE_YOUTUBE_MUSIC", "true")
@@ -174,13 +174,10 @@ android {
         }
     }
 
-    // ABI splits: create smaller per-architecture APKs (reduces size by ~5–10 MB each)
+    // Universal APK: works on all architectures (arm64-v8a, armeabi-v7a, x86_64, x86)
     splits {
         abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
-            isUniversalApk = true // also keep a universal APK for IzzyOnDroid/F-Droid
+            isEnable = false
         }
     }
 
@@ -203,14 +200,8 @@ android {
 androidComponents {
     onVariants { variant ->
         variant.outputs.forEach { output ->
-            val abiSuffix = output.filters
-                .find { it.filterType == FilterConfiguration.FilterType.ABI }
-                ?.identifier
-                ?.let { "-$it" }
-                ?: ""
-
             output.outputFileName.set(
-                "Rhythm-${android.defaultConfig.versionName}-${variant.name}${abiSuffix}.apk"
+                "MR-Music-${android.defaultConfig.versionName}.apk"
             )
         }
     }

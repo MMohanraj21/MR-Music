@@ -9,7 +9,7 @@ Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
 [![Platform](https://img.shields.io/badge/Platform-Android-34A853?style=flat-square&logo=android&logoColor=white)](https://android.com)
 [![API Level](https://img.shields.io/badge/API-26%2B-4285f4?style=flat-square&logo=android&logoColor=white)](https://android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-100%25-7c4dff?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Application ID](https://img.shields.io/badge/Application_ID-com.apple.android.music-FF2A85?style=flat-square)](https://github.com/MMohanraj21/MR-Music)
+[![Application ID](https://img.shields.io/badge/Application_ID-com.luna.music-FF2A85?style=flat-square)](https://github.com/MMohanraj21/MR-Music)
 
 [📥 Download Latest APK](https://github.com/MMohanraj21/MR-Music/releases) • [🐛 Report Issues](https://github.com/MMohanraj21/MR-Music/issues)
 
