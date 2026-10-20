@@ -32,8 +32,8 @@ android {
         
         val overrideVersionCode = project.findProperty("versionCodeOverride")?.toString()?.toIntOrNull()
         val overrideVersionName = project.findProperty("versionNameOverride")?.toString()
-        versionCode = overrideVersionCode ?: 555001306
-        versionName = overrideVersionName ?: "5.5.500.1306 Beta"
+        versionCode = overrideVersionCode ?: 10013
+        versionName = overrideVersionName ?: "1.0.13"
 
         val overrideReleaseDate = project.findProperty("releaseDateOverride")?.toString()
         buildConfigField("String", "RELEASE_DATE", "\"${overrideReleaseDate ?: "2026-10-17"}\"")
@@ -88,8 +88,6 @@ android {
             buildConfigField("boolean", "ENABLE_SPOTIFY_SEARCH", "true")
             buildConfigField("boolean", "ENABLE_WIKIPEDIA", "true")
             buildConfigField("String", "FLAVOR", "\"github\"")
-            
-            versionNameSuffix = "-gh"
         }
     }
 
@@ -132,10 +130,6 @@ android {
             }
         }
         debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
-            //isMinifyEnabled = false
-            //isDebuggable = true
             signingConfig = releaseSigning
         }
         // Required by the macrobenchmark module for baseline profile generation.
