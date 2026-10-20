@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="500"
+    android:viewportHeight="500">
+
+    <group
+        android:pivotX="250"
+        android:pivotY="250"
+        android:scaleX="0.75"
+        android:scaleY="0.75">
+
+        <!-- Outer Sound Ring -->
+        <path
+            android:pathData="M 250,70 A 180,180 0 1,0 250,430 A 180,180 0 1,0 250,70"
+            android:fillColor="#00000000"
+            android:strokeWidth="5"
+            android:strokeAlpha="0.3">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="70"
+                    android:startY="70"
+                    android:endX="430"
+                    android:endY="430"
+                    android:startColor="#FF2A85"
+                    android:endColor="#00F0FF" />
+            </aapt:attr>
+        </path>
+
+        <!-- Inner Sound Ring -->
+        <path
+            android:pathData="M 250,100 A 150,150 0 1,0 250,400 A 150,150 0 1,0 250,100"
+            android:fillColor="#00000000"
+            android:strokeWidth="3"
+            android:strokeAlpha="0.45">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="100"
+                    android:startY="100"
+                    android:endX="400"
+                    android:endY="400"
+                    android:startColor="#FF2A85"
+                    android:endColor="#00F0FF" />
+            </aapt:attr>
+        </path>
+
+        <!-- Monogram Group (Centered & Scaled) -->
+        <group
+            android:pivotX="255"
+            android:pivotY="215"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
+            android:translateX="-5"
+            android:translateY="35">
+
+            <!-- Left Bar of M -->
+            <path
+                android:pathData="M 166,145 h 0 a 11,11 0 0,1 11,11 v 118 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -118 a 11,11 0 0,1 11,-11 z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="155"
+                        android:startY="145"
+                        android:endX="360"
+                        android:endY="300"
+                        android:startColor="#FF2A85"
+                        android:endColor="#00F0FF" />
+                </aapt:attr>
+            </path>
+
+            <!-- Inner Left Wave of M -->
+            <path
+                android:pathData="M 201,175 h 0 a 11,11 0 0,1 11,11 v 58 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -58 a 11,11 0 0,1 11,-11 z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="155"
+                        android:startY="145"
+                        android:endX="360"
+                        android:endY="300"
+                        android:startColor="#FF2A85"
+                        android:endColor="#00F0FF" />
+                </aapt:attr>
+            </path>
+
+            <!-- Center Peak of M -->
+            <path
+                android:pathData="M 236,130 h 0 a 11,11 0 0,1 11,11 v 148 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -148 a 11,11 0 0,1 11,-11 z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="155"
+                        android:startY="145"
+                        android:endX="360"
+                        android:endY="300"
+                        android:startColor="#FF2A85"
+                        android:endColor="#00F0FF" />
+                </aapt:attr>
+            </path>
+
+            <!-- Right Bar of M / Stem of R -->
+            <path
+                android:pathData="M 271,155 h 0 a 11,11 0 0,1 11,11 v 98 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -98 a 11,11 0 0,1 11,-11 z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="155"
+                        android:startY="145"
+                        android:endX="360"
+                        android:endY="300"
+                        android:startColor="#FF2A85"
+                        android:endColor="#00F0FF" />
+                </aapt:attr>
+            </path>
+
+            <!-- Play Button / Loop of R -->
+            <path
+                android:pathData="M 298,155 L 358,192 C 366,197 366,205 358,210 L 298,245 Z"
+                android:fillColor="#00F0FF" />
+
+            <!-- Leg of R -->
+            <path
+                android:pathData="M 305,225 L 350,275"
+                android:strokeWidth="20"
+                android:strokeLineCap="round">
+                <aapt:attr name="android:strokeColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="305"
+                        android:startY="225"
+                        android:endX="350"
+                        android:endY="275"
+                        android:startColor="#7928CA"
+                        android:endColor="#00F0FF" />
+                </aapt:attr>
+            </path>
+        </group>
+    </group>
+</vector>

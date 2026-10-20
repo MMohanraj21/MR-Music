@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="500"
+    android:viewportHeight="500">
+
+    <group
+        android:pivotX="250"
+        android:pivotY="250"
+        android:scaleX="0.75"
+        android:scaleY="0.75">
+
+        <!-- Outer Sound Ring -->
+        <path
+            android:pathData="M 250,70 A 180,180 0 1,0 250,430 A 180,180 0 1,0 250,70"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="5"
+            android:strokeAlpha="0.3" />
+
+        <!-- Inner Sound Ring -->
+        <path
+            android:pathData="M 250,100 A 150,150 0 1,0 250,400 A 150,150 0 1,0 250,100"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="3"
+            android:strokeAlpha="0.45" />
+
+        <!-- Monogram Group (Centered & Scaled) -->
+        <group
+            android:pivotX="255"
+            android:pivotY="215"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
+            android:translateX="-5"
+            android:translateY="35">
+
+            <!-- Left Bar of M -->
+            <path
+                android:pathData="M 166,145 h 0 a 11,11 0 0,1 11,11 v 118 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -118 a 11,11 0 0,1 11,-11 z"
+                android:fillColor="#000000" />
+
+            <!-- Inner Left Wave of M -->
+            <path
+                android:pathData="M 201,175 h 0 a 11,11 0 0,1 11,11 v 58 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -58 a 11,11 0 0,1 11,-11 z"
+                android:fillColor="#000000" />
+
+            <!-- Center Peak of M -->
+            <path
+                android:pathData="M 236,130 h 0 a 11,11 0 0,1 11,11 v 148 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -148 a 11,11 0 0,1 11,-11 z"
+                android:fillColor="#000000" />
+
+            <!-- Right Bar of M / Stem of R -->
+            <path
+                android:pathData="M 271,155 h 0 a 11,11 0 0,1 11,11 v 98 a 11,11 0 0,1 -11,11 h 0 a 11,11 0 0,1 -11,-11 v -98 a 11,11 0 0,1 11,-11 z"
+                android:fillColor="#000000" />
+
+            <!-- Play Button / Loop of R -->
+            <path
+                android:pathData="M 298,155 L 358,192 C 366,197 366,205 358,210 L 298,245 Z"
+                android:fillColor="#000000" />
+
+            <!-- Leg of R -->
+            <path
+                android:pathData="M 305,225 L 350,275"
+                android:strokeColor="#000000"
+                android:strokeWidth="20"
+                android:strokeLineCap="round" />
+        </group>
+    </group>
+</vector>
