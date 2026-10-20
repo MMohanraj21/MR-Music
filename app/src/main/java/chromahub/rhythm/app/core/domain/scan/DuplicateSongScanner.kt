@@ -23,71 +23,104 @@ data class DuplicateGroup(
 
 object DuplicateSongScanner {
 
+    private val BRACKET_PATTERN = Regex("\\[.*?\\]|\\(.*?\\)")
+    private val FEAT_PATTERN = Regex("\\b(feat|ft|featuring|remix|version|audio|video|official|lyric)\\b.*", RegexOption.IGNORE_CASE)
+    private val NON_ALPHANUM_PATTERN = Regex("[^a-z0-9 ]")
+    private val MULTI_SPACE_PATTERN = Regex("\\s+")
+
+    private data class ProcessedSong(
+        val song: Song,
+        val cleanTitle: String,
+        val cleanArtist: String,
+        val durationSeconds: Long
+    )
+
     fun scan(context: Context, songs: List<Song>): List<DuplicateGroup> {
         if (songs.size < 2) return emptyList()
 
-        val candidateGroups = mutableListOf<MutableList<Song>>()
-        val sortedSongs = songs.sortedWith(compareBy({ normalize(it.title) }, { normalize(it.artist) }))
+        // 1. Pre-process and normalize all songs once in O(N)
+        val processed = songs.mapNotNull { song ->
+            val cleanTitle = normalize(song.title)
+            if (cleanTitle.length < 2) null
+            else ProcessedSong(
+                song = song,
+                cleanTitle = cleanTitle,
+                cleanArtist = normalize(song.artist),
+                durationSeconds = song.duration / 1000
+            )
+        }
 
-        for (song in sortedSongs) {
-            val normTitle = normalize(song.title)
-            val normArtist = normalize(song.artist)
-            if (normTitle.isEmpty()) continue
+        // 2. Bucket by cleanTitle in O(N)
+        val titleBuckets = processed.groupBy { it.cleanTitle }
 
-            // Look for existing group matching title, artist, and duration tolerance (+/- 3 seconds)
-            val matchedGroup = candidateGroups.firstOrNull { group ->
-                val first = group.first()
-                val matchTitle = isTitleSimilar(normTitle, normalize(first.title))
-                val matchArtist = isArtistSimilar(normArtist, normalize(first.artist))
-                val matchDuration = abs(song.duration - first.duration) <= 3500L
-                matchTitle && matchArtist && matchDuration
+        val duplicateGroups = mutableListOf<DuplicateGroup>()
+
+        // 3. Only inspect buckets with 2 or more songs with same title
+        for ((_, bucketSongs) in titleBuckets) {
+            if (bucketSongs.size < 2) continue
+
+            // Cluster songs inside the bucket by duration (+/- 4 seconds) and matching artist
+            val subClusters = mutableListOf<MutableList<ProcessedSong>>()
+
+            for (item in bucketSongs) {
+                val matchedCluster = subClusters.firstOrNull { cluster ->
+                    val first = cluster.first()
+                    val matchDuration = abs(item.song.duration - first.song.duration) <= 4000L
+                    val matchArtist = isArtistSimilar(item.cleanArtist, first.cleanArtist)
+                    matchDuration && matchArtist
+                }
+
+                if (matchedCluster != null) {
+                    if (matchedCluster.none { it.song.id == item.song.id }) {
+                        matchedCluster.add(item)
+                    }
+                } else {
+                    subClusters.add(mutableListOf(item))
+                }
             }
 
-            if (matchedGroup != null) {
-                if (matchedGroup.none { it.id == song.id }) {
-                    matchedGroup.add(song)
+            for (cluster in subClusters) {
+                if (cluster.size >= 2) {
+                    val rawSongs = cluster.map { it.song }
+                    val groupItems = rawSongs.map { song ->
+                        val size = resolveFastFileSize(song)
+                        val formatLabel = resolveFormatLabel(song, size)
+                        val folder = resolveFolder(song)
+                        DuplicateSongItem(
+                            song = song,
+                            fileSize = size,
+                            isBestQuality = false,
+                            audioFormatLabel = formatLabel,
+                            folderPath = folder
+                        )
+                    }
+
+                    // Rank: Lossless > Bitrate > File Size > Duration
+                    val sortedItems = groupItems.sortedWith(
+                        compareByDescending<DuplicateSongItem> { isLossless(it.song) }
+                            .thenByDescending { it.song.bitrate ?: 0 }
+                            .thenByDescending { it.fileSize }
+                            .thenByDescending { it.song.duration }
+                    )
+
+                    val markedItems = sortedItems.mapIndexed { index, item ->
+                        item.copy(isBestQuality = (index == 0))
+                    }
+
+                    val firstSong = markedItems.first().song
+                    duplicateGroups.add(
+                        DuplicateGroup(
+                            groupKey = "${cluster.first().cleanTitle}_${firstSong.id}_${firstSong.duration / 1000}",
+                            title = firstSong.title,
+                            artist = firstSong.artist,
+                            items = markedItems
+                        )
+                    )
                 }
-            } else {
-                candidateGroups.add(mutableListOf(song))
             }
         }
 
-        val duplicateGroups = candidateGroups.filter { it.size >= 2 }
-
-        return duplicateGroups.map { songList ->
-            val items = songList.map { song ->
-                val size = resolveFileSize(context, song)
-                val formatLabel = resolveFormatLabel(song, size)
-                val folder = resolveFolder(song)
-                DuplicateSongItem(
-                    song = song,
-                    fileSize = size,
-                    isBestQuality = false,
-                    audioFormatLabel = formatLabel,
-                    folderPath = folder
-                )
-            }
-
-            // Rank items to find the best quality candidate
-            val sortedItems = items.sortedWith(
-                compareByDescending<DuplicateSongItem> { isLossless(it.song) }
-                    .thenByDescending { it.song.bitrate ?: 0 }
-                    .thenByDescending { it.fileSize }
-                    .thenByDescending { it.song.duration }
-            )
-
-            val markedItems = sortedItems.mapIndexed { index, item ->
-                item.copy(isBestQuality = (index == 0))
-            }
-
-            DuplicateGroup(
-                groupKey = "${normalize(markedItems.first().song.title)}_${normalize(markedItems.first().song.artist)}_${markedItems.first().song.duration / 1000}",
-                title = markedItems.first().song.title,
-                artist = markedItems.first().song.artist,
-                items = markedItems
-            )
-        }.sortedByDescending { group ->
-            // Sort groups by potential wasted storage (sum of non-best quality copies)
+        return duplicateGroups.sortedByDescending { group ->
             group.items.drop(1).sumOf { it.fileSize }
         }
     }
@@ -101,40 +134,35 @@ object DuplicateSongScanner {
 
     private fun normalize(text: String?): String {
         if (text.isNullOrBlank()) return ""
-        return text.lowercase(Locale.ROOT)
-            .replace(Regex("\\[.*?\\]|\\(.*?\\)"), "") // remove bracketed text like (official video)
-            .replace(Regex("\\b(feat|ft|featuring|remix|version|audio|video)\\b.*", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("[^a-z0-9 ]"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
-
-    private fun isTitleSimilar(t1: String, t2: String): Boolean {
-        if (t1 == t2) return true
-        if (t1.isEmpty() || t2.isEmpty()) return false
-        return t1.startsWith(t2) || t2.startsWith(t1) || t1.contains(t2) || t2.contains(t1)
+        val withoutBrackets = BRACKET_PATTERN.replace(text.lowercase(Locale.ROOT), "")
+        val withoutFeat = FEAT_PATTERN.replace(withoutBrackets, "")
+        val alphanumericOnly = NON_ALPHANUM_PATTERN.replace(withoutFeat, " ")
+        return MULTI_SPACE_PATTERN.replace(alphanumericOnly, " ").trim()
     }
 
     private fun isArtistSimilar(a1: String, a2: String): Boolean {
         if (a1 == a2) return true
-        if (a1.isEmpty() || a2.isEmpty()) return true // Unknown artist match
+        if (a1.isEmpty() || a2.isEmpty()) return true
         return a1.startsWith(a2) || a2.startsWith(a1) || a1.contains(a2) || a2.contains(a1)
     }
 
-    private fun resolveFileSize(context: Context, song: Song): Long {
+    /**
+     * Fast file size calculation without blocking Android ContentProvider IPC.
+     */
+    private fun resolveFastFileSize(song: Song): Long {
         if (!song.path.isNullOrBlank()) {
-            val file = File(song.path)
-            if (file.exists() && file.isFile) {
-                return file.length()
-            }
+            try {
+                val file = File(song.path)
+                if (file.exists() && file.isFile) {
+                    val len = file.length()
+                    if (len > 0L) return len
+                }
+            } catch (_: Exception) {}
         }
-        return try {
-            context.contentResolver.openFileDescriptor(song.uri, "r")?.use {
-                it.statSize
-            } ?: 0L
-        } catch (e: Exception) {
-            0L
-        }
+
+        // Fast estimation if file stat is unavailable
+        val bitrate = song.bitrate?.takeIf { it > 0 } ?: 160_000
+        return (bitrate.toLong() * (song.duration / 1000L)) / 8L
     }
 
     private fun resolveFormatLabel(song: Song, size: Long): String {

@@ -62,24 +62,29 @@ fun DuplicateCleanerScreen(
     fun refreshScan() {
         scope.launch {
             isScanning = true
-            val results = withContext(Dispatchers.Default) {
-                DuplicateSongScanner.scan(context, songs)
-            }
-            duplicateGroups = results
-            selectedSongIds.clear()
-            // Auto-select duplicate candidates (all items except best quality)
-            results.forEach { group ->
-                group.items.forEach { item ->
-                    if (!item.isBestQuality) {
-                        selectedSongIds[item.song.id] = true
+            try {
+                val currentSongs = musicViewModel.songs.value
+                val results = withContext(Dispatchers.Default) {
+                    DuplicateSongScanner.scan(context, currentSongs)
+                }
+                duplicateGroups = results
+                selectedSongIds.clear()
+                results.forEach { group ->
+                    group.items.forEach { item ->
+                        if (!item.isBestQuality) {
+                            selectedSongIds[item.song.id] = true
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("DuplicateCleaner", "Error during duplicate scan", e)
+            } finally {
+                isScanning = false
             }
-            isScanning = false
         }
     }
 
-    LaunchedEffect(songs) {
+    LaunchedEffect(Unit) {
         refreshScan()
     }
 
