@@ -9,11 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,8 +29,10 @@ import chromahub.rhythm.app.features.local.presentation.viewmodel.MusicViewModel
 import chromahub.rhythm.app.shared.data.model.AppSettings
 import chromahub.rhythm.app.shared.data.model.Song
 import chromahub.rhythm.app.shared.presentation.components.common.CollapsibleHeaderScreen
-import chromahub.rhythm.app.shared.presentation.components.common.LocalMiniPlayerPadding
+import chromahub.rhythm.app.shared.presentation.components.icons.Icon
 import chromahub.rhythm.app.shared.presentation.components.icons.MaterialSymbolIcon
+import chromahub.rhythm.app.shared.presentation.components.icons.RhythmIcons
+import chromahub.rhythm.app.ui.LocalMiniPlayerPadding
 import chromahub.rhythm.app.util.HapticType
 import chromahub.rhythm.app.util.HapticUtils
 import kotlinx.coroutines.Dispatchers
@@ -135,7 +132,7 @@ fun DuplicateCleanerScreen(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.Default.CheckCircle,
+                                imageVector = RhythmIcons.CheckCircle,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(36.dp)
@@ -159,7 +156,7 @@ fun DuplicateCleanerScreen(
                     FilledTonalButton(
                         onClick = { refreshScan() }
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null)
+                        Icon(imageVector = RhythmIcons.Refresh, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Scan Again")
                     }
@@ -203,7 +200,7 @@ fun DuplicateCleanerScreen(
                                     }
 
                                     IconButton(onClick = { refreshScan() }) {
-                                        Icon(Icons.Default.Refresh, contentDescription = "Rescan")
+                                        Icon(imageVector = RhythmIcons.Refresh, contentDescription = "Rescan")
                                     }
                                 }
 
@@ -305,7 +302,7 @@ fun DuplicateCleanerScreen(
                                 ),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(imageVector = RhythmIcons.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Delete ($selectedCount)", maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
@@ -492,7 +489,7 @@ private fun DuplicateSongRow(
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.PlayArrow,
+                    imageVector = if (isCurrentlyPlaying) RhythmIcons.Pause else RhythmIcons.Play,
                     contentDescription = "Preview Audio",
                     tint = if (isCurrentlyPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)

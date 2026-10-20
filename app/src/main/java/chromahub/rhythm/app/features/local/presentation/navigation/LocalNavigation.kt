@@ -2380,7 +2380,7 @@ private fun LocalNavigationContent(
                 composable(Screen.TunerDuplicateCleaner.route) {
                     DuplicateCleanerScreen(
                         onBackClick = navigateBackOrToSettings,
-                        musicViewModel = musicViewModel
+                        musicViewModel = viewModel
                     )
                 }
 
