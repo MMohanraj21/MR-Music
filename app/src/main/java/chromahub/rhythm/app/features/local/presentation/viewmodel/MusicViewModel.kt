@@ -1980,30 +1980,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         
-        // Register ContentObserver for automatic MediaStore updates
-        // Use a full refresh instead of incremental scan to detect removed/re-added songs.
-        // Cancel any pending refresh job before scheduling a new one (debounce pattern).
-        mediaStoreObserverRegisteredTimeMs = SystemClock.elapsedRealtime()
-        repository.registerMediaStoreObserver {
-            val timeSinceRegistration = SystemClock.elapsedRealtime() - mediaStoreObserverRegisteredTimeMs
-            if (timeSinceRegistration < 5000) {
-                Log.d(TAG, "Ignoring false-positive startup MediaStore observer callback ($timeSinceRegistration ms since registration)")
-                return@registerMediaStoreObserver
-            }
-            Log.d(TAG, "MediaStore changed, scheduling debounce check for refresh")
-            mediaStoreRefreshJob?.cancel()
-            mediaStoreRefreshJob = viewModelScope.launch {
-                delay(2000) // Debounce window
-                val lastScan = appSettings.lastScanTimestamp.value
-                val cachedCount = _songs.value.size
-                if (repository.isLibraryStale(lastScan, cachedCount)) {
-                    Log.d(TAG, "MediaStore changed and library is stale. Performing full refresh.")
-                    performMediaStoreRefresh()
-                } else {
-                    Log.d(TAG, "MediaStore callback received, but library is up-to-date. Skipping refresh.")
-                }
-            }
-        }
+        // Automatic background MediaStore scanning disabled per user preference.
+        // Library updates are now strictly manual via refreshLibrary() (e.g. pull-to-refresh or scan button).
         
         // Start artwork fetching in background after a delay
         viewModelScope.launch {
