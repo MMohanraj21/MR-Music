@@ -23,7 +23,7 @@ plugins {
 
 android {
     namespace = "chromahub.rhythm.app"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.luna.music"
