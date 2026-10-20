@@ -32,11 +32,11 @@ android {
         
         val overrideVersionCode = project.findProperty("versionCodeOverride")?.toString()?.toIntOrNull()
         val overrideVersionName = project.findProperty("versionNameOverride")?.toString()
-        versionCode = overrideVersionCode ?: 10014
-        versionName = overrideVersionName ?: "1.0.14"
+        versionCode = overrideVersionCode ?: 10015
+        versionName = overrideVersionName ?: "1.0.15"
 
         val overrideReleaseDate = project.findProperty("releaseDateOverride")?.toString()
-        buildConfigField("String", "RELEASE_DATE", "\"${overrideReleaseDate ?: "2026-10-17"}\"")
+        buildConfigField("String", "RELEASE_DATE", "\"${overrideReleaseDate ?: "2026-10-20"}\"")
 
         val isNightly = project.findProperty("nightly")?.toString() == "true"
         buildConfigField("boolean", "IS_NIGHTLY", isNightly.toString())
@@ -91,7 +91,7 @@ android {
         }
     }
 
-    val signingProperties = getProperties(".config/keystore.properties")
+    val signingProperties = getProperties("keystore/keystore.properties") ?: getProperties(".config/keystore.properties")
     val releaseSigning = if (signingProperties != null) {
         signingConfigs.create("release") {
             keyAlias = signingProperties.property("key_alias")
@@ -101,6 +101,15 @@ android {
         }
     } else {
         signingConfigs.getByName("debug")
+    }
+
+    signingConfigs.getByName("debug") {
+        if (signingProperties != null) {
+            keyAlias = signingProperties.property("key_alias")
+            keyPassword = signingProperties.property("key_password")
+            storePassword = signingProperties.property("store_password")
+            storeFile = rootProject.file(signingProperties.property("store_file"))
+        }
     }
 
     defaultConfig {

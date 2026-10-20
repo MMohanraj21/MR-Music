@@ -38,40 +38,41 @@ jobs:
         run: |
           APK_FILE=$(find app/build/outputs/apk/github/debug/ -type f -name "*.apk" | head -n 1)
           echo "Found APK: $APK_FILE"
-          cp "$APK_FILE" app/build/outputs/apk/github/debug/MR-Music-v1.0.14-release.apk
+          cp "$APK_FILE" app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
           ls -lh app/build/outputs/apk/github/debug/
 
       - name: Upload MR Music APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MR-Music-v1.0.14-release-APK
-          path: app/build/outputs/apk/github/debug/MR-Music-v1.0.14-release.apk
+          name: MR-Music-v1.0.15-release-APK
+          path: app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
           retention-days: 30
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.0.14
-          name: "v1.0.14"
+          tag_name: v1.0.15
+          name: "v1.0.15"
           draft: false
           prerelease: false
           body: |
-            ## 🎵 MR Music v1.0.14
-            
+            ## 🎵 MR Music v1.0.15
+
             Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
-            
+
             ### ✨ Highlights & Changelog
+            - **Permanent Release Signature:** Unified static signing key configured so in-app updates will install seamlessly without signature mismatch conflicts.
             - **Duplicate Cleaner:** Fast O(N) duplicate song scanner and cleaning tool in Library Settings.
             - **Application ID:** `com.spotify.music`
             - **Developer:** Mohanraj.MS (MR Music Studio)
-            - **Version:** `1.0.14`
+            - **Version:** `1.0.15`
             - **Compatibility:** Universal (arm64-v8a, armeabi-v7a, x86_64) - Android 8.0 to Android 15 (Supports Vivo Origin Island)
             - **Custom Logo:** Neon gradient monogram & audio spectrum
             - **Engine:** High-Fidelity Lossless Audio Engine
-            
+
             ### 📥 Direct APK Download
-            Download **`MR-Music-v1.0.14-release.apk`** below to install directly on your Android device!
-          files: app/build/outputs/apk/github/debug/MR-Music-v1.0.14-release.apk
+            Download **`MR-Music-v1.0.15-release.apk`** below to install directly on your Android device!
+          files: app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
