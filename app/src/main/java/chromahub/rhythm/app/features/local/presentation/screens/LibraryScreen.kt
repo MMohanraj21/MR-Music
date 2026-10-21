@@ -2465,9 +2465,8 @@ fun SingleCardSongsContent(
                     key = { _, song -> "song_${song.id}_${song.uri}" },
                     contentType = { _, _ -> "song" }
                 ) { index, song ->
-                    AnimateIn(modifier = Modifier.animateItem()) {
-                        val isSelected = selectedSongIds.contains(song.id)
-                        val selectionIndex = multiSelectionState?.getSelectionIndex(song.id)
+                    val isSelected = selectedSongIds.contains(song.id)
+                    val selectionIndex = multiSelectionState?.getSelectionIndex(song.id)
                         
                         LibrarySongItemWrapper(
                             song = song,
@@ -2543,7 +2542,6 @@ fun SingleCardSongsContent(
                             onToggleDownload = if (isStreamingMode) ({ onStreamingToggleDownload?.invoke(song) }) else null,
                             onOverflowClick = { songForOverflow = song }
                         )
-                    }
                 }
             }
 

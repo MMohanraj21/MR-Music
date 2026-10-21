@@ -32,47 +32,48 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build APK with Gradle
-        run: ./gradlew assembleGithubDebug --stacktrace
+        run: ./gradlew assembleGithubRelease --stacktrace
 
       - name: Rename APK
         run: |
-          APK_FILE=$(find app/build/outputs/apk/github/debug/ -type f -name "*.apk" | head -n 1)
+          APK_FILE=$(find app/build/outputs/apk/github/release/ -type f -name "*.apk" | head -n 1)
           echo "Found APK: $APK_FILE"
-          cp "$APK_FILE" app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
-          ls -lh app/build/outputs/apk/github/debug/
+          cp "$APK_FILE" app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
+          ls -lh app/build/outputs/apk/github/release/
 
       - name: Upload MR Music APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MR-Music-v1.0.15-release-APK
-          path: app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
+          name: MR-Music-v1.0.16-release-APK
+          path: app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
           retention-days: 30
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.0.15
-          name: "v1.0.15"
+          tag_name: v1.0.16
+          name: "v1.0.16"
           draft: false
           prerelease: false
           body: |
-            ## 🎵 MR Music v1.0.15
+            ## 🎵 MR Music v1.0.16 (Release - High Performance)
 
             Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
 
             ### ✨ Highlights & Changelog
-            - **Permanent Release Signature:** Unified static signing key configured so in-app updates will install seamlessly without signature mismatch conflicts.
+            - **Lag Fix & Release Mode:** Full R8 optimization, Kotlin byte-code minification, Compose runtime optimizations, and LeakCanary completely removed for butter-smooth 60/120 FPS performance.
+            - **Smart Manual-Only Media Scanning:** Background re-scanning on startup/scrolling has been removed. MediaStore scanning strictly runs ONLY when manually requested (Pull-to-refresh or Settings -> Media Scan -> Scan Now) or when a new song download completes!
+            - **Smooth Library Scrolling:** Removed heavy list entrance animations during fast library scrolling.
+            - **Optimized Backdrop Blur:** Reduced GPU shader blur radius from 150dp to 32dp for cool and responsive rendering.
             - **Duplicate Cleaner:** Fast O(N) duplicate song scanner and cleaning tool in Library Settings.
+            - **Permanent Release Signature:** Unified static signing key configured for seamless one-click in-app updates.
             - **Application ID:** `com.spotify.music`
             - **Developer:** Mohanraj.MS (MR Music Studio)
-            - **Version:** `1.0.15`
-            - **Compatibility:** Universal (arm64-v8a, armeabi-v7a, x86_64) - Android 8.0 to Android 15 (Supports Vivo Origin Island)
-            - **Custom Logo:** Neon gradient monogram & audio spectrum
-            - **Engine:** High-Fidelity Lossless Audio Engine
+            - **Version:** `1.0.16`
 
             ### 📥 Direct APK Download
-            Download **`MR-Music-v1.0.15-release.apk`** below to install directly on your Android device!
-          files: app/build/outputs/apk/github/debug/MR-Music-v1.0.15-release.apk
+            Download **`MR-Music-v1.0.16-release.apk`** below to install directly on your Android device!
+          files: app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

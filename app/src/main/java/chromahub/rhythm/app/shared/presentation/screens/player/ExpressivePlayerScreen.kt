@@ -1053,7 +1053,7 @@ fun ExpressivePlayerScreen(
                         AsyncImage(
                             model = ImageRequest.Builder(context).data(artworkUri).size(128, 128).build(),
                             contentDescription = null, contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().blur(150.dp)
+                            modifier = Modifier.fillMaxSize().blur(32.dp)
                         )
                         val useHorizontalBackdrop = isLandscapeTablet || isTabletImmersiveLyrics
                         Box(

@@ -1965,23 +1965,26 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         
-        // Startup staleness check: If MediaStore has changes, run background differential sync
+        // Startup scan: Only run initial media scan if library is completely empty (first install).
+        // Automatic background rescans are disabled per user request:
+        // Scanning is strictly manual (pull-to-refresh or Settings -> Media Scan -> Scan) or when new downloads complete.
         viewModelScope.launch(Dispatchers.IO) {
             delay(1200) // Allow UI transition to complete smoothly
             try {
-                val lastScan = appSettings.lastScanTimestamp.value
                 val cachedCount = _songs.value.size
-                if (cachedCount == 0 || repository.isLibraryStale(lastScan, cachedCount)) {
-                    Log.d(TAG, "Library is empty or stale on startup (count=$cachedCount), triggering background refresh")
+                if (cachedCount == 0) {
+                    Log.d(TAG, "Library is completely empty on startup (count=0), performing initial media scan")
                     performMediaStoreRefresh()
+                } else {
+                    Log.d(TAG, "Library already has $cachedCount cached songs. Skipping startup auto-rescan per user preference.")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error during startup staleness check", e)
+                Log.e(TAG, "Error during startup check", e)
             }
         }
         
         // Automatic background MediaStore scanning disabled per user preference.
-        // Library updates are now strictly manual via refreshLibrary() (e.g. pull-to-refresh or scan button).
+        // Library updates are now strictly manual via refreshLibrary() (e.g. pull-to-refresh or scan button) or on new song download.
         
         // Start artwork fetching in background after a delay
         viewModelScope.launch {
