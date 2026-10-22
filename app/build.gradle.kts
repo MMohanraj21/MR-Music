@@ -58,6 +58,21 @@ android {
     flavorDimensions += "distribution"
     
     productFlavors {
+        create("standard") {
+            dimension = "distribution"
+            applicationId = "com.mrmusic.player"
+            
+            // Standard build: Unique package ID for all Android devices (Realme, Samsung, Xiaomi, etc.)
+            buildConfigField("boolean", "ENABLE_YOUTUBE_MUSIC", "true")
+            buildConfigField("boolean", "ENABLE_LYRICALLY_API", "true")
+            buildConfigField("boolean", "ENABLE_DEEZER", "true")
+            buildConfigField("boolean", "ENABLE_LRCLIB", "true")
+            buildConfigField("boolean", "ENABLE_BETTERLYRICS", "true")
+            buildConfigField("boolean", "ENABLE_SPOTIFY_SEARCH", "true")
+            buildConfigField("boolean", "ENABLE_WIKIPEDIA", "true")
+            buildConfigField("String", "FLAVOR", "\"standard\"")
+        }
+
         create("fdroid") {
             dimension = "distribution"
             applicationId = "com.spotify.music"
@@ -98,6 +113,8 @@ android {
             keyPassword = signingProperties.property("key_password")
             storePassword = signingProperties.property("store_password")
             storeFile = rootProject.file(signingProperties.property("store_file"))
+            enableV1Signing = true
+            enableV2Signing = true
         }
     } else {
         signingConfigs.getByName("debug")
@@ -109,6 +126,8 @@ android {
             keyPassword = signingProperties.property("key_password")
             storePassword = signingProperties.property("store_password")
             storeFile = rootProject.file(signingProperties.property("store_file"))
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 

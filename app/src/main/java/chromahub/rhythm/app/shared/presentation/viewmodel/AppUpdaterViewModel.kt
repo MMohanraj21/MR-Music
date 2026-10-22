@@ -1643,8 +1643,9 @@ class AppUpdaterViewModel(
             uploadedApks.filter { asset ->
                 val lowerName = asset.name.lowercase(Locale.ROOT)
                 when (flavor) {
-                    "fdroid" -> lowerName.contains("fdroidrelease") || lowerName.contains("-fdroid-")
-                    "github" -> lowerName.contains("githubrelease") || lowerName.contains("-github-")
+                    "fdroid" -> lowerName.contains("fdroid")
+                    "standard" -> lowerName.contains("standard")
+                    "github" -> !lowerName.contains("standard") && !lowerName.contains("fdroid")
                     else -> false
                 }
             }

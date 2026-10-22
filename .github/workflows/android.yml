@@ -31,21 +31,29 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build APK with Gradle
-        run: ./gradlew assembleGithubRelease --stacktrace
+      - name: Build APKs with Gradle
+        run: ./gradlew assembleGithubRelease assembleStandardRelease --stacktrace
 
-      - name: Rename APK
+      - name: Rename APKs
         run: |
-          APK_FILE=$(find app/build/outputs/apk/github/release/ -type f -name "*.apk" | head -n 1)
-          echo "Found APK: $APK_FILE"
-          cp "$APK_FILE" app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
-          ls -lh app/build/outputs/apk/github/release/
+          GITHUB_APK=$(find app/build/outputs/apk/github/release/ -type f -name "*.apk" | head -n 1)
+          echo "Found GitHub APK: $GITHUB_APK"
+          cp "$GITHUB_APK" app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
 
-      - name: Upload MR Music APK Artifact
+          STANDARD_APK=$(find app/build/outputs/apk/standard/release/ -type f -name "*.apk" | head -n 1)
+          echo "Found Standard APK: $STANDARD_APK"
+          cp "$STANDARD_APK" app/build/outputs/apk/standard/release/MR-Music-v1.0.16-standard-release.apk
+
+          ls -lh app/build/outputs/apk/github/release/
+          ls -lh app/build/outputs/apk/standard/release/
+
+      - name: Upload MR Music APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: MR-Music-v1.0.16-release-APK
-          path: app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
+          name: MR-Music-v1.0.16-release-APKs
+          path: |
+            app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
+            app/build/outputs/apk/standard/release/MR-Music-v1.0.16-standard-release.apk
           retention-days: 30
 
       - name: Create GitHub Release
@@ -61,6 +69,15 @@ jobs:
 
             Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
 
+            ### 📦 Two Editions Available:
+            1. **Standard Edition (`MR-Music-v1.0.16-standard-release.apk`):**
+               - Package ID: `com.mrmusic.player`
+               - Compatible with **all Android devices** (Realme, Samsung, Xiaomi, OnePlus, Motorola, Vivo, etc.).
+               - Works cleanly even if the official Spotify app is already installed on the phone!
+            2. **Vivo Origin Island Edition (`MR-Music-v1.0.16-release.apk`):**
+               - Package ID: `com.spotify.music`
+               - Whitelisted package specifically for Vivo OriginOS Island live notifications.
+
             ### ✨ Highlights & Changelog
             - **Lag Fix & Release Mode:** Full R8 optimization, Kotlin byte-code minification, Compose runtime optimizations, and LeakCanary completely removed for butter-smooth 60/120 FPS performance.
             - **Smart Manual-Only Media Scanning:** Background re-scanning on startup/scrolling has been removed. MediaStore scanning strictly runs ONLY when manually requested (Pull-to-refresh or Settings -> Media Scan -> Scan Now) or when a new song download completes!
@@ -68,12 +85,8 @@ jobs:
             - **Optimized Backdrop Blur:** Reduced GPU shader blur radius from 150dp to 32dp for cool and responsive rendering.
             - **Duplicate Cleaner:** Fast O(N) duplicate song scanner and cleaning tool in Library Settings.
             - **Permanent Release Signature:** Unified static signing key configured for seamless one-click in-app updates.
-            - **Application ID:** `com.spotify.music`
-            - **Developer:** Mohanraj.MS (MR Music Studio)
-            - **Version:** `1.0.16`
-
-            ### 📥 Direct APK Download
-            Download **`MR-Music-v1.0.16-release.apk`** below to install directly on your Android device!
-          files: app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
+          files: |
+            app/build/outputs/apk/github/release/MR-Music-v1.0.16-release.apk
+            app/build/outputs/apk/standard/release/MR-Music-v1.0.16-standard-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
