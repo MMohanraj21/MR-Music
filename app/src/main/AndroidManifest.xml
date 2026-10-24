@@ -216,6 +216,14 @@
                 <data android:mimeType="application/vnd.apple.mpegurl" />
                 <data android:mimeType="application/vnd.apple.mpegurl.audio" />
             </intent-filter>
+
+            <!-- Spotify OAuth Redirect Callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mrmusic" android:host="spotify-callback" />
+            </intent-filter>
         </activity>
         
         <!-- External playback activity for quick audio file playback -->

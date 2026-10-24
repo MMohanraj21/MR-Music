@@ -331,6 +331,14 @@ class AppSettings private constructor(context: Context) {
         private const val KEY_SPOTIFY_API_ENABLED = "spotify_api_enabled"
         private const val KEY_SPOTIFY_CLIENT_ID = "spotify_client_id"
         private const val KEY_SPOTIFY_CLIENT_SECRET = "spotify_client_secret"
+        const val DEFAULT_SPOTIFY_CLIENT_ID = "db8fd65dbbbd4f778ba191e8e20dde49"
+        private const val KEY_SPOTIFY_ACCESS_TOKEN = "spotify_access_token"
+        private const val KEY_SPOTIFY_REFRESH_TOKEN = "spotify_refresh_token"
+        private const val KEY_SPOTIFY_TOKEN_EXPIRES_AT = "spotify_token_expires_at"
+        private const val KEY_SPOTIFY_USER_DISPLAY_NAME = "spotify_user_display_name"
+        private const val KEY_SPOTIFY_USER_ID = "spotify_user_id"
+        private const val KEY_SPOTIFY_USER_AVATAR_URL = "spotify_user_avatar_url"
+        private const val KEY_SPOTIFY_CODE_VERIFIER = "spotify_code_verifier"
         private const val KEY_LYRICALLY_API_ENABLED = "lyrically_api_enabled"
         private const val KEY_WIKIPEDIA_API_ENABLED = "wikipedia_api_enabled"
         private const val KEY_AUTO_FETCH_ARTWORK = "auto_fetch_artwork"
@@ -1747,11 +1755,32 @@ class AppSettings private constructor(context: Context) {
     )
     val appleCanvasNetworkMode: StateFlow<CanvasNetworkMode> = _appleCanvasNetworkMode.asStateFlow()
     
-    private val _spotifyClientId = MutableStateFlow(prefs.getString(KEY_SPOTIFY_CLIENT_ID, "") ?: "")
+    private val _spotifyClientId = MutableStateFlow(prefs.getString(KEY_SPOTIFY_CLIENT_ID, DEFAULT_SPOTIFY_CLIENT_ID) ?: DEFAULT_SPOTIFY_CLIENT_ID)
     val spotifyClientId: StateFlow<String> = _spotifyClientId.asStateFlow()
     
     private val _spotifyClientSecret = MutableStateFlow(prefs.getString(KEY_SPOTIFY_CLIENT_SECRET, "") ?: "")
     val spotifyClientSecret: StateFlow<String> = _spotifyClientSecret.asStateFlow()
+
+    private val _spotifyAccessToken = MutableStateFlow(prefs.getString(KEY_SPOTIFY_ACCESS_TOKEN, "") ?: "")
+    val spotifyAccessToken: StateFlow<String> = _spotifyAccessToken.asStateFlow()
+
+    private val _spotifyRefreshToken = MutableStateFlow(prefs.getString(KEY_SPOTIFY_REFRESH_TOKEN, "") ?: "")
+    val spotifyRefreshToken: StateFlow<String> = _spotifyRefreshToken.asStateFlow()
+
+    private val _spotifyTokenExpiresAt = MutableStateFlow(prefs.getLong(KEY_SPOTIFY_TOKEN_EXPIRES_AT, 0L))
+    val spotifyTokenExpiresAt: StateFlow<Long> = _spotifyTokenExpiresAt.asStateFlow()
+
+    private val _spotifyUserDisplayName = MutableStateFlow(prefs.getString(KEY_SPOTIFY_USER_DISPLAY_NAME, "") ?: "")
+    val spotifyUserDisplayName: StateFlow<String> = _spotifyUserDisplayName.asStateFlow()
+
+    private val _spotifyUserId = MutableStateFlow(prefs.getString(KEY_SPOTIFY_USER_ID, "") ?: "")
+    val spotifyUserId: StateFlow<String> = _spotifyUserId.asStateFlow()
+
+    private val _spotifyUserAvatarUrl = MutableStateFlow(prefs.getString(KEY_SPOTIFY_USER_AVATAR_URL, "") ?: "")
+    val spotifyUserAvatarUrl: StateFlow<String> = _spotifyUserAvatarUrl.asStateFlow()
+
+    private val _spotifyCodeVerifier = MutableStateFlow(prefs.getString(KEY_SPOTIFY_CODE_VERIFIER, "") ?: "")
+    val spotifyCodeVerifier: StateFlow<String> = _spotifyCodeVerifier.asStateFlow()
 
 
     // General Broadcast Status Settings
@@ -3891,6 +3920,59 @@ private val _autoCheckForUpdates = MutableStateFlow(prefs.getBoolean(KEY_AUTO_CH
         _spotifyClientSecret.value = clientSecret
     }
 
+    fun setSpotifyAuthSession(
+        accessToken: String,
+        refreshToken: String?,
+        expiresInSeconds: Long,
+        displayName: String? = null,
+        userId: String? = null,
+        avatarUrl: String? = null
+    ) {
+        val expiresAt = System.currentTimeMillis() + (expiresInSeconds * 1000L)
+        prefs.edit {
+            putString(KEY_SPOTIFY_ACCESS_TOKEN, accessToken)
+            if (!refreshToken.isNullOrBlank()) {
+                putString(KEY_SPOTIFY_REFRESH_TOKEN, refreshToken)
+            }
+            putLong(KEY_SPOTIFY_TOKEN_EXPIRES_AT, expiresAt)
+            if (displayName != null) putString(KEY_SPOTIFY_USER_DISPLAY_NAME, displayName)
+            if (userId != null) putString(KEY_SPOTIFY_USER_ID, userId)
+            if (avatarUrl != null) putString(KEY_SPOTIFY_USER_AVATAR_URL, avatarUrl)
+        }
+        _spotifyAccessToken.value = accessToken
+        if (!refreshToken.isNullOrBlank()) {
+            _spotifyRefreshToken.value = refreshToken
+        }
+        _spotifyTokenExpiresAt.value = expiresAt
+        if (displayName != null) _spotifyUserDisplayName.value = displayName
+        if (userId != null) _spotifyUserId.value = userId
+        if (avatarUrl != null) _spotifyUserAvatarUrl.value = avatarUrl
+    }
+
+    fun setSpotifyCodeVerifier(verifier: String) {
+        prefs.edit { putString(KEY_SPOTIFY_CODE_VERIFIER, verifier) }
+        _spotifyCodeVerifier.value = verifier
+    }
+
+    fun clearSpotifyAuth() {
+        prefs.edit {
+            remove(KEY_SPOTIFY_ACCESS_TOKEN)
+            remove(KEY_SPOTIFY_REFRESH_TOKEN)
+            remove(KEY_SPOTIFY_TOKEN_EXPIRES_AT)
+            remove(KEY_SPOTIFY_USER_DISPLAY_NAME)
+            remove(KEY_SPOTIFY_USER_ID)
+            remove(KEY_SPOTIFY_USER_AVATAR_URL)
+            remove(KEY_SPOTIFY_CODE_VERIFIER)
+        }
+        _spotifyAccessToken.value = ""
+        _spotifyRefreshToken.value = ""
+        _spotifyTokenExpiresAt.value = 0L
+        _spotifyUserDisplayName.value = ""
+        _spotifyUserId.value = ""
+        _spotifyUserAvatarUrl.value = ""
+        _spotifyCodeVerifier.value = ""
+    }
+
 
     // General Broadcast Status Methods
     fun setBroadcastStatusEnabled(enabled: Boolean) {
@@ -5622,9 +5704,15 @@ private val _autoCheckForUpdates = MutableStateFlow(prefs.getBoolean(KEY_AUTO_CH
             ?.filter { it.isNotBlank() && it in defaultLyricallySources }
             ?.toSet()
             ?: defaultDisabledLyricallySources
-        _autoFetchArtwork.value = prefs.getBoolean(KEY_AUTO_FETCH_ARTWORK, true)
-        _spotifyClientId.value = prefs.getString(KEY_SPOTIFY_CLIENT_ID, "") ?: ""
+        _spotifyClientId.value = prefs.getString(KEY_SPOTIFY_CLIENT_ID, DEFAULT_SPOTIFY_CLIENT_ID) ?: DEFAULT_SPOTIFY_CLIENT_ID
         _spotifyClientSecret.value = prefs.getString(KEY_SPOTIFY_CLIENT_SECRET, "") ?: ""
+        _spotifyAccessToken.value = prefs.getString(KEY_SPOTIFY_ACCESS_TOKEN, "") ?: ""
+        _spotifyRefreshToken.value = prefs.getString(KEY_SPOTIFY_REFRESH_TOKEN, "") ?: ""
+        _spotifyTokenExpiresAt.value = prefs.getLong(KEY_SPOTIFY_TOKEN_EXPIRES_AT, 0L)
+        _spotifyUserDisplayName.value = prefs.getString(KEY_SPOTIFY_USER_DISPLAY_NAME, "") ?: ""
+        _spotifyUserId.value = prefs.getString(KEY_SPOTIFY_USER_ID, "") ?: ""
+        _spotifyUserAvatarUrl.value = prefs.getString(KEY_SPOTIFY_USER_AVATAR_URL, "") ?: ""
+        _spotifyCodeVerifier.value = prefs.getString(KEY_SPOTIFY_CODE_VERIFIER, "") ?: ""
 
         // General Broadcast Status Settings
         _broadcastStatusEnabled.value = prefs.getBoolean(KEY_BROADCAST_STATUS_ENABLED, false)

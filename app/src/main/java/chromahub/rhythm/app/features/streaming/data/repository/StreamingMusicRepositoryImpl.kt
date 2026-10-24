@@ -83,6 +83,8 @@ class StreamingMusicRepositoryImpl(
 
     private val subsonicClient = SubsonicApiClient(context)
     private val jellyfinClient = JellyfinApiClient(context)
+    private val spotifyApiClient = chromahub.rhythm.app.features.streaming.data.provider.SpotifyApiClient(context)
+    private val ytStreamResolver = chromahub.rhythm.app.features.streaming.data.provider.YouTubeAudioStreamResolver(context)
 
     private val songsFlow = MutableStateFlow<List<PlayableItem>>(emptyList())
     private val albumsFlow = MutableStateFlow<List<AlbumItem>>(emptyList())
@@ -420,6 +422,16 @@ class StreamingMusicRepositoryImpl(
         val result = when (normalizedService) {
             StreamingServiceId.SUBSONIC -> subsonicClient.login(serverUrl, username, password, saveCredentials)
             StreamingServiceId.JELLYFIN -> jellyfinClient.login(serverUrl, username, password, saveCredentials)
+            StreamingServiceId.SPOTIFY -> {
+                if (chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)) {
+                    Result.success(ProviderConnectionResult(
+                        displayName = appSettings.spotifyUserDisplayName.value.ifBlank { "Spotify User" },
+                        serverUrl = "https://api.spotify.com/v1"
+                    ))
+                } else {
+                    Result.failure(IllegalStateException("Spotify not authenticated"))
+                }
+            }
             else -> Result.failure(IllegalArgumentException("Unsupported streaming service"))
         }
 
@@ -437,6 +449,7 @@ class StreamingMusicRepositoryImpl(
         when (normalized) {
             StreamingServiceId.SUBSONIC -> subsonicClient.logout()
             StreamingServiceId.JELLYFIN -> jellyfinClient.logout()
+            StreamingServiceId.SPOTIFY -> chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.logout(context)
         }
 
         try {
@@ -456,6 +469,7 @@ class StreamingMusicRepositoryImpl(
         return when (normalizeServiceId(serviceId)) {
             StreamingServiceId.SUBSONIC -> subsonicClient.isConnected()
             StreamingServiceId.JELLYFIN -> jellyfinClient.isConnected()
+            StreamingServiceId.SPOTIFY -> chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)
             else -> false
         }
     }
@@ -468,6 +482,7 @@ class StreamingMusicRepositoryImpl(
         return when (activeServiceId()) {
             StreamingServiceId.SUBSONIC -> subsonicClient.ping().isSuccess
             StreamingServiceId.JELLYFIN -> jellyfinClient.ping().isSuccess
+            StreamingServiceId.SPOTIFY -> chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.getValidAccessToken(context) != null
             else -> false
         }
     }
@@ -838,6 +853,12 @@ class StreamingMusicRepositoryImpl(
         val resolved = when (serviceId) {
             StreamingServiceId.SUBSONIC -> subsonicClient.buildStreamUrl(providerId, bitrate)
             StreamingServiceId.JELLYFIN -> jellyfinClient.buildStreamUrl(providerId, bitrate)
+            StreamingServiceId.SPOTIFY -> {
+                val song = songCache[songId] ?: getSongById(songId)
+                if (song != null) {
+                    ytStreamResolver.resolveStreamUrl(song.title, song.artist, song.duration)
+                } else null
+            }
             else -> null
         }
 
@@ -1536,6 +1557,19 @@ class StreamingMusicRepositoryImpl(
             return emptyList()
         }
 
+        if (serviceId == StreamingServiceId.SPOTIFY) {
+            onProgress?.invoke(0, 100, 0)
+            val liked = spotifyApiClient.getLikedSongs(limit = 50)
+            syncPlaylists()
+            replaceCatalog(liked)
+            likedSongIds.clear()
+            liked.forEach { likedSongIds.add(it.id) }
+            updateLikedSongsFlow()
+            saveCatalogCache(serviceId)
+            onProgress?.invoke(100, 100, liked.size)
+            return liked
+        }
+
         // Sync artists directly from provider first so all artists appear immediately
         syncArtists()
 
@@ -1627,6 +1661,13 @@ class StreamingMusicRepositoryImpl(
         if (!isServiceConnected(serviceId)) {
             playlistsFlow.value = emptyList()
             return emptyList()
+        }
+
+        if (serviceId == StreamingServiceId.SPOTIFY) {
+            val spotifyPlaylists = spotifyApiClient.getUserPlaylists(limit = 50)
+            playlistsFlow.value = spotifyPlaylists
+            saveCatalogCache(serviceId)
+            return spotifyPlaylists
         }
 
         val result = when (serviceId) {
@@ -1955,6 +1996,7 @@ class StreamingMusicRepositoryImpl(
         val result = when (serviceId) {
             StreamingServiceId.SUBSONIC -> subsonicClient.getPlaylistSongs(providerPlaylistId)
             StreamingServiceId.JELLYFIN -> jellyfinClient.getPlaylistSongs(providerPlaylistId)
+            StreamingServiceId.SPOTIFY -> return spotifyApiClient.getPlaylistTracks(providerPlaylistId)
             else -> Result.success(emptyList())
         }
 
@@ -2337,6 +2379,9 @@ class StreamingMusicRepositoryImpl(
     }
 
     private fun decodeSongId(songId: String): Pair<String, String>? {
+        if (songId.startsWith("spotify_")) {
+            return StreamingServiceId.SPOTIFY to songId.removePrefix("spotify_")
+        }
         val separatorIndex = songId.indexOf("::")
         if (separatorIndex <= 0 || separatorIndex >= songId.length - 2) {
             return null
@@ -2348,6 +2393,9 @@ class StreamingMusicRepositoryImpl(
     }
 
     private fun decodePlaylistId(playlistId: String): Pair<String, String>? {
+        if (playlistId.startsWith("spotify_pl_")) {
+            return StreamingServiceId.SPOTIFY to playlistId.removePrefix("spotify_pl_")
+        }
         val marker = "::playlist::"
         val separatorIndex = playlistId.indexOf(marker)
         if (separatorIndex <= 0 || separatorIndex >= playlistId.length - marker.length) {
@@ -2411,6 +2459,7 @@ class StreamingMusicRepositoryImpl(
         return when (serviceId) {
             StreamingServiceId.SUBSONIC -> SourceType.SUBSONIC
             StreamingServiceId.JELLYFIN -> SourceType.JELLYFIN
+            StreamingServiceId.SPOTIFY -> SourceType.SPOTIFY
             else -> SourceType.UNKNOWN
         }
     }

@@ -2087,6 +2087,9 @@ class StreamingMusicViewModel(application: Application) : AndroidViewModel(appli
         username: String,
         password: String
     ) {
+        if (serviceId == StreamingServiceId.SPOTIFY) {
+            return // Spotify uses OAuth PKCE
+        }
         if (StreamingServiceRules.requiresServerUrl(serviceId) && serverUrl.isBlank()) {
             throw IllegalArgumentException("Server URL is required")
         }
@@ -2103,6 +2106,7 @@ class StreamingMusicViewModel(application: Application) : AndroidViewModel(appli
         return when (serviceId.uppercase()) {
             StreamingServiceId.SUBSONIC -> SourceType.SUBSONIC
             StreamingServiceId.JELLYFIN -> SourceType.JELLYFIN
+            StreamingServiceId.SPOTIFY -> SourceType.SPOTIFY
             else -> SourceType.UNKNOWN
         }
     }
@@ -2111,7 +2115,7 @@ class StreamingMusicViewModel(application: Application) : AndroidViewModel(appli
         return when (sourceType) {
             SourceType.SUBSONIC -> StreamingServiceId.SUBSONIC
             SourceType.JELLYFIN -> StreamingServiceId.JELLYFIN
-            SourceType.SPOTIFY,
+            SourceType.SPOTIFY -> StreamingServiceId.SPOTIFY
             SourceType.APPLE_MUSIC,
             SourceType.YOUTUBE_MUSIC,
             SourceType.DEEZER,

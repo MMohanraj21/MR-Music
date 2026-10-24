@@ -8,9 +8,11 @@ package chromahub.rhythm.app.features.streaming.domain.model
 object StreamingServiceId {
     const val SUBSONIC = "SUBSONIC"
     const val JELLYFIN = "JELLYFIN"
+    const val SPOTIFY = "SPOTIFY"
     val all = listOf(
         SUBSONIC,
-        JELLYFIN
+        JELLYFIN,
+        SPOTIFY
     )
 }
 

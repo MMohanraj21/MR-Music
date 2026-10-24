@@ -789,6 +789,25 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Handling intent: ${intent.action}, data: ${intent.data}")
         
         try {
+            val dataUri = intent.data
+            if (dataUri != null && dataUri.scheme == "mrmusic" && dataUri.host == "spotify-callback") {
+                Log.d(TAG, "Spotify OAuth callback received: $dataUri")
+                androidx.lifecycle.lifecycleScope.launch {
+                    val result = chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.handleAuthCallback(this@MainActivity, dataUri)
+                    if (result.isSuccess) {
+                        Toast.makeText(this@MainActivity, getString(chromahub.rhythm.app.R.string.spotify_login_success), Toast.LENGTH_SHORT).show()
+                        val appSettings = chromahub.rhythm.app.shared.data.model.AppSettings.getInstance(this@MainActivity)
+                        appSettings.setAppMode("STREAMING")
+                        val streamingVm = androidx.lifecycle.ViewModelProvider(this@MainActivity)[chromahub.rhythm.app.features.streaming.presentation.viewmodel.StreamingMusicViewModel::class.java]
+                        streamingVm.refreshCurrentSession()
+                        streamingVm.loadLibrary(forceSync = true)
+                    } else {
+                        Toast.makeText(this@MainActivity, "${getString(chromahub.rhythm.app.R.string.spotify_login_failed)}: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+                return
+            }
+
             val shouldOpenPlayer = intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
 
             // OPEN_PLAYER/OPEN_QUEUE are navigation hints, not content intents.

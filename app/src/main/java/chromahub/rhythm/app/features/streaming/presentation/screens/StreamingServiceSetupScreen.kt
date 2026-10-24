@@ -86,6 +86,11 @@ fun StreamingServiceSetupScreen(
     val session = sessions[serviceId] ?: viewModel.getServiceSession(serviceId)
     val requiresServerUrl = remember(serviceId) { StreamingServiceRules.requiresServerUrl(serviceId) }
 
+    val isSpotify = serviceId == StreamingServiceId.SPOTIFY
+    val spotifyConnected = isSpotify && chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)
+    val spotifyDisplayName by appSettings.spotifyUserDisplayName.collectAsState()
+    val spotifyClientId by appSettings.spotifyClientId.collectAsState()
+
     var serverUrl by rememberSaveable(serviceId) { mutableStateOf(session.serverUrl) }
     var username by rememberSaveable(serviceId) { mutableStateOf(session.username) }
     var password by rememberSaveable(serviceId) { mutableStateOf("") }
@@ -104,7 +109,15 @@ fun StreamingServiceSetupScreen(
         session.isConnected -> stringResource(id = R.string.streaming_status_connected)
         else -> stringResource(id = R.string.streaming_status_not_connected)
     }
-    val oneLinerStatus = if (session.isConnected && session.username.isNotBlank()) {
+    val oneLinerStatus = if (isSpotify) {
+        if (spotifyConnected && spotifyDisplayName.isNotBlank()) {
+            stringResource(id = R.string.streaming_service_setup_connected_as, spotifyDisplayName)
+        } else if (spotifyConnected) {
+            stringResource(id = R.string.streaming_status_connected)
+        } else {
+            stringResource(id = R.string.streaming_status_not_connected)
+        }
+    } else if (session.isConnected && session.username.isNotBlank()) {
         stringResource(id = R.string.streaming_service_setup_connected_as, session.username)
     } else {
         statusText
@@ -136,6 +149,7 @@ fun StreamingServiceSetupScreen(
                     val providerIconRes = when (serviceId) {
                         StreamingServiceId.SUBSONIC -> R.drawable.ic_subsonic
                         StreamingServiceId.JELLYFIN -> R.drawable.ic_jellyfin
+                        StreamingServiceId.SPOTIFY -> R.drawable.ic_spotify
                         else -> null
                     }
                     if (providerIconRes != null) {
@@ -155,7 +169,128 @@ fun StreamingServiceSetupScreen(
                 }
             }
 
-            if (isBusy) {
+            if (isSpotify) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            if (spotifyConnected) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_spotify),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(44.dp)
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = spotifyDisplayName.ifBlank { "Spotify User" },
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "Connected via Spotify Web API",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = "Your Liked Songs and personal playlists are synced. Songs stream ad-free in high quality.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Button(
+                                    onClick = {
+                                        viewModel.loadLibrary(forceSync = true)
+                                        android.widget.Toast.makeText(context, context.getString(R.string.spotify_syncing), android.widget.Toast.LENGTH_SHORT).show()
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(
+                                        imageVector = MaterialSymbolIcon("sync"),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = stringResource(R.string.spotify_sync_library))
+                                }
+
+                                OutlinedButton(
+                                    onClick = {
+                                        chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.logout(context)
+                                        viewModel.disconnectService(serviceId)
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(text = stringResource(R.string.spotify_disconnect))
+                                }
+                            } else {
+                                Text(
+                                    text = "Connect your Spotify account to listen to your Liked Songs and personal playlists directly in MR Music.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+
+                                var customClientId by rememberSaveable { mutableStateOf(spotifyClientId) }
+                                OutlinedTextField(
+                                    value = customClientId,
+                                    onValueChange = {
+                                        customClientId = it
+                                        appSettings.setSpotifyClientId(it)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("Spotify Client ID") },
+                                    singleLine = true
+                                )
+
+                                Button(
+                                    onClick = {
+                                        chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                                    },
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = androidx.compose.ui.graphics.Color(0xFF1DB954),
+                                        contentColor = androidx.compose.ui.graphics.Color.White
+                                    ),
+                                    shape = RoundedCornerShape(24.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp)
+                                ) {
+                                    Image(
+                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_spotify),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = stringResource(R.string.spotify_connect),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (isBusy) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
