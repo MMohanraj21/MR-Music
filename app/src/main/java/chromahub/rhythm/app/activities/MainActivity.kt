@@ -792,7 +792,7 @@ class MainActivity : AppCompatActivity() {
             val dataUri = intent.data
             if (dataUri != null && dataUri.scheme == "mrmusic" && dataUri.host == "spotify-callback") {
                 Log.d(TAG, "Spotify OAuth callback received: $dataUri")
-                androidx.lifecycle.lifecycleScope.launch {
+                val authJob = lifecycleScope.launch {
                     val result = chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.handleAuthCallback(this@MainActivity, dataUri)
                     if (result.isSuccess) {
                         Toast.makeText(this@MainActivity, getString(chromahub.rhythm.app.R.string.spotify_login_success), Toast.LENGTH_SHORT).show()
@@ -805,6 +805,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "${getString(chromahub.rhythm.app.R.string.spotify_login_failed)}: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
+                lifecycleScopeJobs.add(authJob)
                 return
             }
 

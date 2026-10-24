@@ -11,7 +11,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
-import androidx.browser.customtabs.CustomTabsIntent
 import chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId
 import chromahub.rhythm.app.shared.data.model.AppSettings
 import kotlinx.coroutines.Dispatchers
@@ -81,15 +80,12 @@ object SpotifyAuthManager {
         Log.d(TAG, "Starting Spotify login with clientId=$clientId, redirect=$REDIRECT_URI")
 
         try {
-            val customTabsIntent = CustomTabsIntent.Builder().build()
-            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            customTabsIntent.launchUrl(context, authUri)
-        } catch (e: Exception) {
-            Log.w(TAG, "CustomTabs failed, falling back to standard ACTION_VIEW: ${e.message}")
             val browserIntent = Intent(Intent.ACTION_VIEW, authUri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(browserIntent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to launch browser for Spotify auth: ${e.message}", e)
         }
     }
 
