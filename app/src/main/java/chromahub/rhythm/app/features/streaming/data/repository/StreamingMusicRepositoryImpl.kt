@@ -1676,7 +1676,7 @@ class StreamingMusicRepositoryImpl(
                         val extId = pl.externalId ?: pl.id.removePrefix("spotify_pl_")
                         val tracks = spotifyApiClient.getPlaylistTracks(extId)
                         val artwork = pl.artworkUri ?: tracks.firstOrNull()?.artworkUri
-                        pl.copy(tracks = tracks, songCount = tracks.size, artworkUri = artwork)
+                        pl.copy(playlistTracks = tracks, songCount = tracks.size, artworkUri = artwork)
                     }
                 }.awaitAll()
             }
@@ -1803,7 +1803,7 @@ class StreamingMusicRepositoryImpl(
         if (activeServiceId() == StreamingServiceId.SPOTIFY || id.startsWith("spotify_pl_")) {
             val extId = (cached as? StreamingPlaylist)?.externalId ?: id.removePrefix("spotify_pl_")
             val tracks = spotifyApiClient.getPlaylistTracks(extId)
-            val updated = (cached as? StreamingPlaylist)?.copy(tracks = tracks, songCount = tracks.size)
+            val updated = (cached as? StreamingPlaylist)?.copy(playlistTracks = tracks, songCount = tracks.size)
                 ?: StreamingPlaylist(
                     id = id,
                     name = "Spotify Playlist",
@@ -1813,7 +1813,7 @@ class StreamingMusicRepositoryImpl(
                     isEditable = false,
                     sourceType = SourceType.SPOTIFY,
                     externalId = extId,
-                    tracks = tracks
+                    playlistTracks = tracks
                 )
             playlistsFlow.value = (playlistsFlow.value.filterNot { it.id == id } + updated)
             return updated
@@ -2073,7 +2073,7 @@ class StreamingMusicRepositoryImpl(
             isCollaborative = false,
             followers = null,
             snapshotId = null,
-            tracks = resolvedTracks
+            playlistTracks = resolvedTracks
         )
     }
 
