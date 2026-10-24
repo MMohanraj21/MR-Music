@@ -270,7 +270,10 @@ fun GoSettingsScreen(
                         pendingServiceSelection = serviceId
                     } else {
                         appSettings.setStreamingService(serviceId)
-                        if (appMode == "STREAMING") {
+                        if (serviceId == chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY &&
+                            !chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)) {
+                            chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                        } else if (appMode == "STREAMING") {
                             viewModel.refreshCurrentSession()
                         }
                         showServiceSheet = false
@@ -310,7 +313,10 @@ fun GoSettingsScreen(
             confirmButton = {
                 Button(onClick = {
                     appSettings.setStreamingService(pendingId)
-                    if (appMode == "STREAMING") {
+                    if (pendingId == chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY &&
+                        !chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)) {
+                        chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                    } else if (appMode == "STREAMING") {
                         viewModel.refreshCurrentSession()
                     }
                     pendingServiceSelection = null

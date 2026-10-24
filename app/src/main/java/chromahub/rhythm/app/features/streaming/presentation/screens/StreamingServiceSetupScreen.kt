@@ -90,6 +90,14 @@ fun StreamingServiceSetupScreen(
     val spotifyConnected = isSpotify && chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)
     val spotifyDisplayName by appSettings.spotifyUserDisplayName.collectAsState()
     val spotifyClientId by appSettings.spotifyClientId.collectAsState()
+    var hasAutoLaunchedSpotify by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(isSpotify, spotifyConnected) {
+        if (isSpotify && !spotifyConnected && !hasAutoLaunchedSpotify) {
+            hasAutoLaunchedSpotify = true
+            chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+        }
+    }
 
     var serverUrl by rememberSaveable(serviceId) { mutableStateOf(session.serverUrl) }
     var username by rememberSaveable(serviceId) { mutableStateOf(session.username) }
@@ -248,18 +256,6 @@ fun StreamingServiceSetupScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
-                                )
-
-                                var customClientId by rememberSaveable { mutableStateOf(spotifyClientId) }
-                                OutlinedTextField(
-                                    value = customClientId,
-                                    onValueChange = {
-                                        customClientId = it
-                                        appSettings.setSpotifyClientId(it)
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Spotify Client ID") },
-                                    singleLine = true
                                 )
 
                                 Button(

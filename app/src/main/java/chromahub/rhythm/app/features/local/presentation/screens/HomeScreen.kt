@@ -1325,7 +1325,11 @@ private fun StreamingHomeWelcomeContent(
                                 FilledTonalButton(
                                     onClick = {
                                         appSettings.setStreamingService(service.id)
-                                        onConfigureService(service.id)
+                                        if (service.id == chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY && !isConnected) {
+                                            chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                                        } else {
+                                            onConfigureService(service.id)
+                                        }
                                     }
                                 ) {
                                     Text(
@@ -1340,7 +1344,11 @@ private fun StreamingHomeWelcomeContent(
                         },
                         onClick = {
                             appSettings.setStreamingService(service.id)
-                            onConfigureService(service.id)
+                            if (service.id == chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY && !isConnected) {
+                                chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                            } else {
+                                onConfigureService(service.id)
+                            }
                         }
                     )
                 }

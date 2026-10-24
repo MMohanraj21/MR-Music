@@ -38,11 +38,11 @@ jobs:
         run: |
           GITHUB_APK=$(find app/build/outputs/apk/github/release/ -type f -name "*.apk" | head -n 1)
           echo "Found GitHub APK: $GITHUB_APK"
-          cp "$GITHUB_APK" app/build/outputs/apk/github/release/MR-Music-v1.0.17-release.apk
+          cp "$GITHUB_APK" app/build/outputs/apk/github/release/MR-Music-v1.0.18-release.apk
 
           STANDARD_APK=$(find app/build/outputs/apk/standard/release/ -type f -name "*.apk" | head -n 1)
           echo "Found Standard APK: $STANDARD_APK"
-          cp "$STANDARD_APK" app/build/outputs/apk/standard/release/MR-Music-v1.0.17-standard-release.apk
+          cp "$STANDARD_APK" app/build/outputs/apk/standard/release/MR-Music-v1.0.18-standard-release.apk
 
           ls -lh app/build/outputs/apk/github/release/
           ls -lh app/build/outputs/apk/standard/release/
@@ -50,42 +50,42 @@ jobs:
       - name: Upload MR Music APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: MR-Music-v1.0.17-release-APKs
+          name: MR-Music-v1.0.18-release-APKs
           path: |
-            app/build/outputs/apk/github/release/MR-Music-v1.0.17-release.apk
-            app/build/outputs/apk/standard/release/MR-Music-v1.0.17-standard-release.apk
+            app/build/outputs/apk/github/release/MR-Music-v1.0.18-release.apk
+            app/build/outputs/apk/standard/release/MR-Music-v1.0.18-standard-release.apk
           retention-days: 30
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.0.17
-          name: "v1.0.17"
+          tag_name: v1.0.18
+          name: "v1.0.18"
           draft: false
           prerelease: false
           body: |
-            ## 🎵 MR Music v1.0.17 (Release - Spotify Login & Ad-Free Streaming)
+            ## 🎵 MR Music v1.0.18 (Release - Seamless Spotify Sync & Direct 1-Click Login)
 
             Developed and engineered by **Mohanraj.MS** (**MR Music Studio**).
 
             ### 📦 Two Editions Available:
-            1. **Standard Edition (`MR-Music-v1.0.17-standard-release.apk`):**
+            1. **Standard Edition (`MR-Music-v1.0.18-standard-release.apk`):**
                - Package ID: `com.mrmusic.player`
                - Compatible with **all Android devices** (Realme, Samsung, Xiaomi, OnePlus, Motorola, Vivo, etc.).
                - Works cleanly even if the official Spotify app is already installed on the phone!
-            2. **Vivo Origin Island Edition (`MR-Music-v1.0.17-release.apk`):**
+            2. **Vivo Origin Island Edition (`MR-Music-v1.0.18-release.apk`):**
                - Package ID: `com.spotify.music`
                - Whitelisted package specifically for Vivo OriginOS Island live notifications.
 
-            ### ✨ Highlights & Changelog
-            - **Full Spotify Account Login (OAuth 2.0 PKCE):** Easily log in to your personal Spotify account with zero premium subscription required!
-            - **Library & Playlist Sync:** Syncs your Liked Songs (Favorites) and custom personal playlists directly to MR Music.
-            - **Ad-Free High-Quality Audio Playback:** Synced Spotify tracks stream online through YouTube Music and ExoPlayer with zero advertisements and unlimited skips.
-            - **ExoPlayer Background Audio Caching:** Tracks are seamlessly cached into your phone storage via `AudioCacheManager` for buffer-free playback.
-            - **Smart Manual-Only Media Scanning & 60/120 FPS fluid scrolling:** Ultra-responsive performance, fast startup, and duplicate cleaner.
+            ### ✨ What's New in v1.0.18:
+            - **Direct 1-Click Spotify Login:** Clicking Spotify opens the official login page immediately—no Client ID fields or setup hassles.
+            - **Full Spotify Library & Playlist Sync:** Fixed session state and auth checks so user's Liked Songs and all Playlists sync seamlessly with all their tracks.
+            - **Auto-Pagination for Large Libraries:** Fetches hundreds of liked songs and playlist tracks automatically.
+            - **Ad-Free High-Quality Audio Playback:** Synced tracks stream online through YouTube Music and ExoPlayer with zero advertisements and unlimited skips.
+            - **Offline ExoPlayer Caching:** Tracks are cached into your phone storage via `AudioCacheManager` for buffer-free playback.
           files: |
-            app/build/outputs/apk/github/release/MR-Music-v1.0.17-release.apk
-            app/build/outputs/apk/standard/release/MR-Music-v1.0.17-standard-release.apk
+            app/build/outputs/apk/github/release/MR-Music-v1.0.18-release.apk
+            app/build/outputs/apk/standard/release/MR-Music-v1.0.18-standard-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

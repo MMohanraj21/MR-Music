@@ -798,8 +798,16 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, getString(chromahub.rhythm.app.R.string.spotify_login_success), Toast.LENGTH_SHORT).show()
                         val appSettings = chromahub.rhythm.app.shared.data.model.AppSettings.getInstance(this@MainActivity)
                         appSettings.setAppMode("STREAMING")
+                        appSettings.setStreamingService(chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY)
+                        val sessionRepo = chromahub.rhythm.app.features.streaming.data.repository.StreamingServiceSessionRepository(this@MainActivity)
+                        sessionRepo.connect(
+                            serviceId = chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY,
+                            serverUrl = "https://api.spotify.com",
+                            username = appSettings.spotifyUserDisplayName.value.ifBlank { "Spotify User" }
+                        )
                         val streamingVm = androidx.lifecycle.ViewModelProvider(this@MainActivity)[chromahub.rhythm.app.features.streaming.presentation.viewmodel.StreamingMusicViewModel::class.java]
                         streamingVm.refreshCurrentSession()
+                        streamingVm.loadHomeContent()
                         streamingVm.loadLibrary(forceSync = true)
                     } else {
                         Toast.makeText(this@MainActivity, "${getString(chromahub.rhythm.app.R.string.spotify_login_failed)}: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()

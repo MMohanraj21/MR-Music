@@ -2032,6 +2032,7 @@ class StreamingMusicViewModel(application: Application) : AndroidViewModel(appli
                     when (normalizedServiceId) {
                         "SUBSONIC" -> providerRepository?.authenticate() == true
                         "JELLYFIN" -> providerRepository?.authenticate() == true
+                        "SPOTIFY" -> providerRepository?.authenticate() == true
                         else -> false
                     }
                 } catch (e: Exception) {

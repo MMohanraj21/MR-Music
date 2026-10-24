@@ -153,6 +153,14 @@ object SpotifyAuthManager {
             appSettings.setSpotifyApiEnabled(true)
             appSettings.setIntegrationsEnabled(true)
 
+            // Explicitly mark session as connected in StreamingServiceSessionRepository
+            val sessionRepo = chromahub.rhythm.app.features.streaming.data.repository.StreamingServiceSessionRepository(context)
+            sessionRepo.connect(
+                serviceId = StreamingServiceId.SPOTIFY,
+                serverUrl = "https://api.spotify.com",
+                username = appSettings.spotifyUserDisplayName.value.ifBlank { "Spotify User" }
+            )
+
             Log.i(TAG, "Successfully authenticated with Spotify! User: ${appSettings.spotifyUserDisplayName.value}")
             Result.success(appSettings.spotifyUserDisplayName.value)
         } catch (e: Exception) {
@@ -273,6 +281,8 @@ object SpotifyAuthManager {
     fun logout(context: Context) {
         val appSettings = AppSettings.getInstance(context)
         appSettings.clearSpotifyAuth()
+        val sessionRepo = chromahub.rhythm.app.features.streaming.data.repository.StreamingServiceSessionRepository(context)
+        sessionRepo.disconnect(StreamingServiceId.SPOTIFY)
         Log.i(TAG, "Spotify session cleared")
     }
 }

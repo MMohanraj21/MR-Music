@@ -37,147 +37,180 @@ class SpotifyApiClient(private val context: Context) {
     }
 
     /**
-     * Fetches the user's saved (liked) songs from Spotify.
+     * Fetches the user's saved (liked) songs from Spotify, paginating up to maxSongs (default 500).
      */
-    suspend fun getLikedSongs(limit: Int = 50, offset: Int = 0): List<StreamingSong> = withContext(Dispatchers.IO) {
+    suspend fun getLikedSongs(maxSongs: Int = 500): List<StreamingSong> = withContext(Dispatchers.IO) {
         val auth = getAuthHeader() ?: return@withContext emptyList()
-        val url = "$BASE_URL/me/tracks?limit=$limit&offset=$offset"
+        val allSongs = mutableListOf<StreamingSong>()
+        var offset = 0
+        val pageSize = 50
 
         try {
-            val request = Request.Builder()
-                .url(url)
-                .header("Authorization", auth)
-                .build()
+            while (offset < maxSongs) {
+                val url = "$BASE_URL/me/tracks?limit=$pageSize&offset=$offset"
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Authorization", auth)
+                    .build()
 
-            val response = httpClient.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Failed to fetch liked songs: HTTP ${response.code}")
-                return@withContext emptyList()
+                val response = httpClient.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Failed to fetch liked songs at offset $offset: HTTP ${response.code}")
+                    break
+                }
+
+                val body = response.body?.string().orEmpty()
+                val json = JSONObject(body)
+                val items = json.optJSONArray("items")
+                if (items == null || items.length() == 0) break
+
+                for (i in 0 until items.length()) {
+                    val itemObj = items.getJSONObject(i)
+                    val trackObj = itemObj.optJSONObject("track") ?: continue
+                    parseSpotifyTrack(trackObj, isFavorite = true)?.let { allSongs.add(it) }
+                }
+
+                val total = json.optInt("total", 0)
+                offset += items.length()
+                if (offset >= total || items.length() < pageSize) {
+                    break
+                }
             }
-
-            val body = response.body?.string().orEmpty()
-            val json = JSONObject(body)
-            val items = json.optJSONArray("items") ?: return@withContext emptyList()
-            val songs = mutableListOf<StreamingSong>()
-
-            for (i in 0 until items.length()) {
-                val itemObj = items.getJSONObject(i)
-                val trackObj = itemObj.optJSONObject("track") ?: continue
-                parseSpotifyTrack(trackObj, isFavorite = true)?.let { songs.add(it) }
-            }
-
-            songs
+            Log.i(TAG, "Successfully fetched ${allSongs.size} Spotify liked songs")
+            allSongs
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching Spotify liked songs: ${e.message}", e)
-            emptyList()
+            allSongs
         }
     }
 
     /**
-     * Fetches all user playlists from Spotify.
+     * Fetches all user playlists from Spotify, paginating up to maxPlaylists (default 100).
      */
-    suspend fun getUserPlaylists(limit: Int = 50, offset: Int = 0): List<StreamingPlaylist> = withContext(Dispatchers.IO) {
+    suspend fun getUserPlaylists(maxPlaylists: Int = 100): List<StreamingPlaylist> = withContext(Dispatchers.IO) {
         val auth = getAuthHeader() ?: return@withContext emptyList()
-        val url = "$BASE_URL/me/playlists?limit=$limit&offset=$offset"
+        val allPlaylists = mutableListOf<StreamingPlaylist>()
+        var offset = 0
+        val pageSize = 50
 
         try {
-            val request = Request.Builder()
-                .url(url)
-                .header("Authorization", auth)
-                .build()
+            while (offset < maxPlaylists) {
+                val url = "$BASE_URL/me/playlists?limit=$pageSize&offset=$offset"
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Authorization", auth)
+                    .build()
 
-            val response = httpClient.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Failed to fetch user playlists: HTTP ${response.code}")
-                return@withContext emptyList()
-            }
+                val response = httpClient.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Failed to fetch user playlists at offset $offset: HTTP ${response.code}")
+                    break
+                }
 
-            val body = response.body?.string().orEmpty()
-            val json = JSONObject(body)
-            val items = json.optJSONArray("items") ?: return@withContext emptyList()
-            val playlists = mutableListOf<StreamingPlaylist>()
+                val body = response.body?.string().orEmpty()
+                val json = JSONObject(body)
+                val items = json.optJSONArray("items")
+                if (items == null || items.length() == 0) break
 
-            for (i in 0 until items.length()) {
-                val plObj = items.getJSONObject(i)
-                val id = plObj.optString("id")
-                if (id.isBlank()) continue
+                for (i in 0 until items.length()) {
+                    val plObj = items.getJSONObject(i)
+                    val id = plObj.optString("id")
+                    if (id.isBlank()) continue
 
-                val name = plObj.optString("name", "Untitled Playlist")
-                val description = plObj.optString("description", "")
-                val tracksInfo = plObj.optJSONObject("tracks")
-                val trackCount = tracksInfo?.optInt("total", 0) ?: 0
+                    val name = plObj.optString("name", "Untitled Playlist")
+                    val description = plObj.optString("description", "")
+                    val tracksInfo = plObj.optJSONObject("tracks")
+                    val trackCount = tracksInfo?.optInt("total", 0) ?: 0
 
-                val images = plObj.optJSONArray("images")
-                val artworkUri = if (images != null && images.length() > 0) {
-                    images.getJSONObject(0).optString("url", null)
-                } else null
+                    val images = plObj.optJSONArray("images")
+                    val artworkUri = if (images != null && images.length() > 0) {
+                        images.getJSONObject(0).optString("url", null)
+                    } else null
 
-                val ownerObj = plObj.optJSONObject("owner")
-                val owner = if (ownerObj != null) {
-                    PlaylistOwner(
-                        id = ownerObj.optString("id", ""),
-                        displayName = ownerObj.optString("display_name", "Spotify User")
+                    val ownerObj = plObj.optJSONObject("owner")
+                    val owner = if (ownerObj != null) {
+                        PlaylistOwner(
+                            id = ownerObj.optString("id", ""),
+                            displayName = ownerObj.optString("display_name", "Spotify User")
+                        )
+                    } else null
+
+                    allPlaylists.add(
+                        StreamingPlaylist(
+                            id = "spotify_pl_$id",
+                            name = name,
+                            description = description.ifBlank { null },
+                            artworkUri = artworkUri,
+                            songCount = trackCount,
+                            isEditable = plObj.optBoolean("collaborative", false),
+                            sourceType = SourceType.SPOTIFY,
+                            externalId = id,
+                            owner = owner,
+                            isPublic = plObj.optBoolean("public", true),
+                            isCollaborative = plObj.optBoolean("collaborative", false)
+                        )
                     )
-                } else null
+                }
 
-                playlists.add(
-                    StreamingPlaylist(
-                        id = "spotify_pl_$id",
-                        name = name,
-                        description = description.ifBlank { null },
-                        artworkUri = artworkUri,
-                        songCount = trackCount,
-                        isEditable = plObj.optBoolean("collaborative", false),
-                        sourceType = SourceType.SPOTIFY,
-                        externalId = id,
-                        owner = owner,
-                        isPublic = plObj.optBoolean("public", true),
-                        isCollaborative = plObj.optBoolean("collaborative", false)
-                    )
-                )
+                val total = json.optInt("total", 0)
+                offset += items.length()
+                if (offset >= total || items.length() < pageSize) {
+                    break
+                }
             }
-
-            playlists
+            Log.i(TAG, "Successfully fetched ${allPlaylists.size} Spotify playlists")
+            allPlaylists
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching Spotify playlists: ${e.message}", e)
-            emptyList()
+            allPlaylists
         }
     }
 
     /**
-     * Fetches tracks inside a specific Spotify playlist.
+     * Fetches tracks inside a specific Spotify playlist, paginating up to maxTracks (default 500).
      */
-    suspend fun getPlaylistTracks(playlistExternalId: String, limit: Int = 100, offset: Int = 0): List<StreamingSong> = withContext(Dispatchers.IO) {
+    suspend fun getPlaylistTracks(playlistExternalId: String, maxTracks: Int = 500): List<StreamingSong> = withContext(Dispatchers.IO) {
         val auth = getAuthHeader() ?: return@withContext emptyList()
-        val url = "$BASE_URL/playlists/$playlistExternalId/tracks?limit=$limit&offset=$offset"
+        val allSongs = mutableListOf<StreamingSong>()
+        var offset = 0
+        val pageSize = 100
 
         try {
-            val request = Request.Builder()
-                .url(url)
-                .header("Authorization", auth)
-                .build()
+            while (offset < maxTracks) {
+                val url = "$BASE_URL/playlists/$playlistExternalId/tracks?limit=$pageSize&offset=$offset"
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Authorization", auth)
+                    .build()
 
-            val response = httpClient.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Failed to fetch playlist tracks for $playlistExternalId: HTTP ${response.code}")
-                return@withContext emptyList()
+                val response = httpClient.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Failed to fetch playlist tracks for $playlistExternalId at offset $offset: HTTP ${response.code}")
+                    break
+                }
+
+                val body = response.body?.string().orEmpty()
+                val json = JSONObject(body)
+                val items = json.optJSONArray("items")
+                if (items == null || items.length() == 0) break
+
+                for (i in 0 until items.length()) {
+                    val itemObj = items.getJSONObject(i)
+                    val trackObj = itemObj.optJSONObject("track") ?: continue
+                    parseSpotifyTrack(trackObj)?.let { allSongs.add(it) }
+                }
+
+                val total = json.optInt("total", 0)
+                offset += items.length()
+                if (offset >= total || items.length() < pageSize) {
+                    break
+                }
             }
-
-            val body = response.body?.string().orEmpty()
-            val json = JSONObject(body)
-            val items = json.optJSONArray("items") ?: return@withContext emptyList()
-            val songs = mutableListOf<StreamingSong>()
-
-            for (i in 0 until items.length()) {
-                val itemObj = items.getJSONObject(i)
-                val trackObj = itemObj.optJSONObject("track") ?: continue
-                parseSpotifyTrack(trackObj)?.let { songs.add(it) }
-            }
-
-            songs
+            Log.i(TAG, "Fetched ${allSongs.size} tracks for Spotify playlist $playlistExternalId")
+            allSongs
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching tracks for playlist $playlistExternalId: ${e.message}", e)
-            emptyList()
+            allSongs
         }
     }
 

@@ -1559,15 +1559,20 @@ class StreamingMusicRepositoryImpl(
 
         if (serviceId == StreamingServiceId.SPOTIFY) {
             onProgress?.invoke(0, 100, 0)
-            val liked = spotifyApiClient.getLikedSongs(limit = 50)
-            syncPlaylists()
-            replaceCatalog(liked)
+            val liked = spotifyApiClient.getLikedSongs()
+            onProgress?.invoke(50, 100, liked.size)
+            val playlists = syncPlaylists()
+
+            // Merge all tracks from Liked Songs and all Playlists into one unified catalog
+            val allSongs = (liked + playlists.flatMap { it.getTracks() }).distinctBy { it.id }
+
+            replaceCatalog(allSongs)
             likedSongIds.clear()
             liked.forEach { likedSongIds.add(it.id) }
             updateLikedSongsFlow()
             saveCatalogCache(serviceId)
-            onProgress?.invoke(100, 100, liked.size)
-            return liked
+            onProgress?.invoke(100, 100, allSongs.size)
+            return allSongs
         }
 
         // Sync artists directly from provider first so all artists appear immediately
@@ -1664,10 +1669,20 @@ class StreamingMusicRepositoryImpl(
         }
 
         if (serviceId == StreamingServiceId.SPOTIFY) {
-            val spotifyPlaylists = spotifyApiClient.getUserPlaylists(limit = 50)
-            playlistsFlow.value = spotifyPlaylists
+            val rawPlaylists = spotifyApiClient.getUserPlaylists()
+            val fullPlaylists = coroutineScope {
+                rawPlaylists.map { pl ->
+                    async {
+                        val extId = pl.externalId ?: pl.id.removePrefix("spotify_pl_")
+                        val tracks = spotifyApiClient.getPlaylistTracks(extId)
+                        val artwork = pl.artworkUri ?: tracks.firstOrNull()?.artworkUri
+                        pl.copy(tracks = tracks, songCount = tracks.size, artworkUri = artwork)
+                    }
+                }.awaitAll()
+            }
+            playlistsFlow.value = fullPlaylists
             saveCatalogCache(serviceId)
-            return spotifyPlaylists
+            return fullPlaylists
         }
 
         val result = when (serviceId) {
@@ -1781,7 +1796,29 @@ class StreamingMusicRepositoryImpl(
     }
 
     override suspend fun getPlaylistById(id: String): PlaylistItem? {
-        return playlistsFlow.value.firstOrNull { it.id == id }
+        val cached = playlistsFlow.value.firstOrNull { it.id == id }
+        if (cached is StreamingPlaylist && cached.getTracks().isNotEmpty()) {
+            return cached
+        }
+        if (activeServiceId() == StreamingServiceId.SPOTIFY || id.startsWith("spotify_pl_")) {
+            val extId = (cached as? StreamingPlaylist)?.externalId ?: id.removePrefix("spotify_pl_")
+            val tracks = spotifyApiClient.getPlaylistTracks(extId)
+            val updated = (cached as? StreamingPlaylist)?.copy(tracks = tracks, songCount = tracks.size)
+                ?: StreamingPlaylist(
+                    id = id,
+                    name = "Spotify Playlist",
+                    description = null,
+                    artworkUri = tracks.firstOrNull()?.artworkUri,
+                    songCount = tracks.size,
+                    isEditable = false,
+                    sourceType = SourceType.SPOTIFY,
+                    externalId = extId,
+                    tracks = tracks
+                )
+            playlistsFlow.value = (playlistsFlow.value.filterNot { it.id == id } + updated)
+            return updated
+        }
+        return cached
     }
 
     override suspend fun getSongsForAlbum(albumId: String): List<PlayableItem> {

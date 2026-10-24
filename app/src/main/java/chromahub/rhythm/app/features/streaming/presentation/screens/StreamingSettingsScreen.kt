@@ -308,6 +308,10 @@ fun StreamingSettingsScreen(
             onSelect = { serviceId ->
                 HapticUtils.performHapticFeedback(context, hapticFeedback, HapticType.LIGHT)
                 appSettings.setStreamingService(serviceId)
+                if (serviceId == chromahub.rhythm.app.features.streaming.domain.model.StreamingServiceId.SPOTIFY &&
+                    !chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.isAuthenticated(context)) {
+                    chromahub.rhythm.app.features.streaming.data.provider.SpotifyAuthManager.startLogin(context)
+                }
                 showServiceSheet = false
             }
         )
