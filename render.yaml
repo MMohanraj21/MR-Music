@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: mr-music-listen-together
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: listen-together/server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production

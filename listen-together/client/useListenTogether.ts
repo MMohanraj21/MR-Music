@@ -59,7 +59,7 @@ export function useListenTogether(
   options: UseListenTogetherOptions = {}
 ) {
   const {
-    serverUrl = 'http://localhost:4000',
+    serverUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_JAM_SERVER_URL) || 'https://mr-music-listen-together.onrender.com',
     userName = 'Listener',
     autoConnect = false
   } = options;
