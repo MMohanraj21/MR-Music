@@ -1,0 +1,28 @@
+{
+  "name": "mr-music-listen-together-server",
+  "version": "1.0.0",
+  "description": "MR Music - Real-time Listen Together (Jam Session) Synchronization Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "music",
+    "socket.io",
+    "synchronization",
+    "jam-session",
+    "mr-music",
+    "real-time"
+  ],
+  "author": "Mohanraj.MS (MR Music Studio)",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

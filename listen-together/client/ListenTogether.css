@@ -1,0 +1,453 @@
+/* MR Music - Listen Together Stylesheet */
+
+.jam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: jamFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jam-modal {
+  width: 100%;
+  max-width: 440px;
+  background: #141416;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Floating Reactions Container */
+.jam-reactions-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.jam-floating-emoji {
+  position: absolute;
+  bottom: 80px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(30, 30, 35, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  animation: floatUp 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  pointer-events: none;
+}
+
+.jam-floating-emoji .emoji {
+  font-size: 24px;
+}
+
+.jam-floating-emoji .user-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a0a0a8;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  30% {
+    transform: translateY(-40px) scale(1) translateX(6px);
+  }
+  60% {
+    transform: translateY(-120px) translateX(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-240px) scale(0.85) translateX(12px);
+  }
+}
+
+/* Header */
+.jam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.jam-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.jam-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.jam-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.jam-header p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+.jam-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #a0a0a8;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.jam-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Body */
+.jam-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Input Fields */
+.jam-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jam-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #8e8e93;
+  letter-spacing: 0.5px;
+}
+
+.jam-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.jam-input:focus {
+  border-color: #ff4b2b;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.jam-input-code {
+  letter-spacing: 4px;
+  font-weight: 700;
+  font-family: monospace;
+  text-transform: uppercase;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Buttons */
+.jam-primary-btn {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(255, 75, 43, 0.35);
+  transition: transform 0.15s, opacity 0.2s;
+}
+
+.jam-primary-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.jam-primary-btn:active {
+  transform: translateY(0);
+}
+
+.jam-secondary-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: #fff;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.jam-secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.jam-danger-btn {
+  background: rgba(255, 59, 48, 0.15);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  border-radius: 12px;
+  color: #ff453a;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jam-danger-btn:hover {
+  background: rgba(255, 59, 48, 0.25);
+}
+
+/* Room Code Card */
+.jam-room-card {
+  background: linear-gradient(145deg, rgba(255, 75, 43, 0.1), rgba(255, 65, 108, 0.04));
+  border: 1px solid rgba(255, 75, 43, 0.25);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.jam-room-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ff6b4a;
+  letter-spacing: 1px;
+}
+
+.jam-room-code-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jam-code-text {
+  font-family: monospace;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 75, 43, 0.4);
+}
+
+.jam-copy-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.jam-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.jam-copy-btn.copied {
+  background: #34c759;
+  border-color: #34c759;
+  color: #fff;
+}
+
+/* Active Listeners */
+.jam-listeners-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jam-listeners-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #8e8e93;
+  font-weight: 600;
+}
+
+.jam-listeners-pill {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.jam-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34c759;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.jam-users-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.jam-user-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.jam-user-chip.host {
+  border-color: rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.08);
+  color: #ffd700;
+}
+
+/* Now Playing Bar */
+.jam-now-playing {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jam-track-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #222;
+  object-fit: cover;
+}
+
+.jam-track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.jam-track-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jam-track-artist {
+  font-size: 11px;
+  color: #8e8e93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Emoji Bar */
+.jam-reactions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 6px 10px;
+}
+
+.jam-reaction-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.jam-reaction-btn:hover {
+  transform: scale(1.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jam-reaction-btn:active {
+  transform: scale(0.9);
+}
+
+/* Animations */
+@keyframes jamFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
