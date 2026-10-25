@@ -132,6 +132,7 @@ fun ExtraControlBottomSheet(
     onArtist: () -> Unit = {},
     onSongInfo: () -> Unit,
     onShareFile: () -> Unit = {},
+    onListenTogether: (() -> Unit)? = null,
     haptic: HapticFeedback,
     isExtraSmallWidth: Boolean = false,
     isCompactWidth: Boolean = false
@@ -163,6 +164,20 @@ fun ExtraControlBottomSheet(
                 onClick = {
                     HapticUtils.performHapticFeedback(context, haptic, HapticType.HEAVY)
                     dismissAndDo { editControls() }
+                }
+            ))
+        }
+
+        onListenTogether?.let { listenTogether ->
+            add(ControlAction(
+                icon = RhythmIcons.CastConnected,
+                label = "Listen Together",
+                description = "Jam Session",
+                containerColor = Color(0xFFFF4B2B).copy(alpha = 0.15f),
+                iconColor = Color(0xFFFF4B2B),
+                onClick = {
+                    HapticUtils.performHapticFeedback(context, haptic, HapticType.HEAVY)
+                    dismissAndDo { listenTogether() }
                 }
             ))
         }

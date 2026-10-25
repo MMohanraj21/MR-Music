@@ -268,6 +268,7 @@ fun PlayerScreen(
         var showQueueSheet by remember { mutableStateOf(false) }
         var showSongInfoSheet by remember { mutableStateOf(false) }
         var showMoreSheet by remember { mutableStateOf(false) }
+        var showListenTogetherSheet by remember { mutableStateOf(false) }
         var showExpressiveBottomButtonsSheet by remember { mutableStateOf(false) }
         var showDeviceOutputSheet by remember { mutableStateOf(false) }
         var showAddToPlaylistSheetInternal by remember { mutableStateOf(false) }
@@ -758,9 +759,22 @@ fun PlayerScreen(
                         }
                     }
                 },
+                onListenTogether = { showListenTogetherSheet = true },
                 haptic = haptic,
                 isExtraSmallWidth = false,
                 isCompactWidth = false
+            )
+        }
+
+        if (showListenTogetherSheet) {
+            val listenTogetherSheetState = rememberBottomSheetState(
+                initialValue = SheetValue.Expanded,
+                enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+            )
+            chromahub.rhythm.app.features.jam.presentation.ListenTogetherBottomSheet(
+                onDismiss = { showListenTogetherSheet = false },
+                sheetState = listenTogetherSheetState,
+                musicViewModel = musicViewModel
             )
         }
 

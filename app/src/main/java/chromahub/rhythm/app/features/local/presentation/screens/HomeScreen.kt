@@ -316,6 +316,7 @@ fun HomeScreen(
 
     // Home section order bottom sheet state
     var showHomeSectionOrderSheet by remember { mutableStateOf(false) }
+    var showListenTogetherSheet by remember { mutableStateOf(false) }
 
     val isLibraryRefreshing by musicViewModel.isLibraryRefreshing.collectAsState()
     var streamingIsRefreshing by remember { mutableStateOf(false) }
@@ -557,6 +558,18 @@ fun HomeScreen(
         }
     }
 
+    if (showListenTogetherSheet) {
+        val listenTogetherSheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+        )
+        chromahub.rhythm.app.features.jam.presentation.ListenTogetherBottomSheet(
+            onDismiss = { showListenTogetherSheet = false },
+            sheetState = listenTogetherSheetState,
+            musicViewModel = musicViewModel
+        )
+    }
+
     CollapsibleHeaderScreen(
         title = if (isStreamingMode) context.getString(R.string.streaming_integration_title) else context.getString(R.string.home_title),
         headerDisplayMode = headerDisplayMode,
@@ -566,6 +579,17 @@ fun HomeScreen(
         headerActions = buildList {
             val showReorder = !isLandscapeTablet
             val showSettings = !isTablet && floatingNavigationBar
+
+            add(
+                HeaderAction(
+                    icon = RhythmIcons.CastConnected,
+                    contentDescription = "Listen Together Jam Session",
+                    onClick = {
+                        HapticUtils.performHapticFeedback(context, haptics, HapticType.HEAVY)
+                        showListenTogetherSheet = true
+                    }
+                )
+            )
 
             if (showReorder) {
                 add(
