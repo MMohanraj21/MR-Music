@@ -107,7 +107,7 @@ fun ListenTogetherBottomSheet(
     // Wire ListenTogetherManager to MusicViewModel playback
     LaunchedEffect(Unit) {
         ListenTogetherManager.getCurrentPositionMs = {
-            musicViewModel.currentPosition.value
+            (musicViewModel.progress.value * musicViewModel.duration.value).toLong()
         }
         ListenTogetherManager.onRemoteSeek = { posMs ->
             musicViewModel.seekTo(posMs)
@@ -132,11 +132,13 @@ fun ListenTogetherBottomSheet(
     // Keep Host playback continuously broadcasted to listeners
     val hostCurrentSong by musicViewModel.currentSong.collectAsState()
     val hostIsPlaying by musicViewModel.isPlaying.collectAsState()
-    val hostPosition by musicViewModel.currentPosition.collectAsState()
+    val hostProgress by musicViewModel.progress.collectAsState()
+    val hostDuration by musicViewModel.duration.collectAsState()
 
     LaunchedEffect(hostCurrentSong, hostIsPlaying) {
         if (isHost && roomCode != null) {
-            ListenTogetherManager.broadcastPlaybackState(hostIsPlaying, hostPosition, hostCurrentSong)
+            val hostPos = (hostProgress * hostDuration).toLong()
+            ListenTogetherManager.broadcastPlaybackState(hostIsPlaying, hostPos, hostCurrentSong)
         }
     }
 
@@ -270,10 +272,10 @@ fun ListenTogetherBottomSheet(
                         shape = RoundedCornerShape(14.dp),
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
-                            imeAction = ImeAction.Join
+                            imeAction = ImeAction.Done
                         ),
                         keyboardActions = KeyboardActions(
-                            onJoin = {
+                            onDone = {
                                 if (roomCodeInput.isNotBlank()) {
                                     ListenTogetherManager.joinRoom(roomCodeInput, userNameInput)
                                 }
